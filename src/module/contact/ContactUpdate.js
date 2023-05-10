@@ -6,7 +6,6 @@ import axios from "axios";
 import { useMemo } from "react";
 import { doc, getDoc, updateDoc } from "firebase/firestore";
 import { db } from "../../firebase-app/firebase-config";
-import slugify from "slugify";
 import { toast } from "react-toastify";
 import ReactQuill, { Quill } from "react-quill";
 import "react-quill/dist/quill.snow.css";
@@ -109,7 +108,7 @@ const ContactUpdate = () => {
           isLoading={isSubmitting}
           disabled={isSubmitting}
         >
-          Update post
+          Update Contact
         </Button>
       </form>
     </ContactUpdateStyles>

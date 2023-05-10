@@ -16,7 +16,6 @@ const LayoutCategoryStyles = styled.div`
   @media screen and (max-width: 600px) {
     .heading {
       margin-top: 30px;
-      margin-bottom: 20px;
       font-size: 20px;
     }
     .post-item {

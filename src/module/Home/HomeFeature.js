@@ -9,7 +9,7 @@ import React, { useEffect, useState } from "react";
 import styled from "styled-components";
 import { Heading } from "../../components";
 import { db } from "../../firebase-app/firebase-config";
-import PostFeatureItem from "../posts/PostFeatureItem";
+import PostItem from "../posts/PostItem";
 
 const HomeFeatureStyles = styled.div`
   .feature {
@@ -21,11 +21,11 @@ const HomeFeatureStyles = styled.div`
   }
   .content-feature {
     display: flex;
-    justify-content: space-between;
+    justify-content: flex-start;
     align-items: center;
-    column-gap: 30px;
+    column-gap: 20px;
   }
-  @media screen and (max-width: 1024px) {
+  @media screen and (max-width: 1324px) {
     .title {
       margin-bottom: 10px;
     }
@@ -37,6 +37,12 @@ const HomeFeatureStyles = styled.div`
       overflow: auto;
     }
   }
+  @media screen and (max-width: 600px) {
+    .content-feature {
+      flex-wrap: wrap;
+      overflow: hidden;
+    }
+  }
 `;
 const HomeFeature = () => {
   const [post, setPost] = useState([]);
@@ -46,7 +52,7 @@ const HomeFeature = () => {
       colRef,
       where("status", "==", 1),
       where("hot", "==", true),
-      limit(3)
+      limit(4)
     );
     onSnapshot(queries, (snapshot) => {
       const results = [];
@@ -69,7 +75,7 @@ const HomeFeature = () => {
           </div>
           <div className="content-feature">
             {post?.map((item) => (
-              <PostFeatureItem key={item.id} data={item}></PostFeatureItem>
+              <PostItem key={item.id} data={item}></PostItem>
             ))}
           </div>
         </div>

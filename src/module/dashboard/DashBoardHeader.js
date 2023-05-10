@@ -4,9 +4,6 @@ import styled from "styled-components";
 import { useAuth } from "../../contexts/auth-context";
 
 const DashBoardHeaderStyles = styled.div`
-  position: fixed;
-  z-index: 20;
-  top: 0;
   width: 100%;
   background-color: #fff;
   padding: 20px;
@@ -15,18 +12,10 @@ const DashBoardHeaderStyles = styled.div`
   justify-content: space-between;
   gap: 20px;
   .logo {
-    display: flex;
-    align-items: center;
-    gap: 20px;
-    font-size: 22px;
-    font-weight: 600;
+    margin-left: 10px;
     img {
       max-width: 60px;
     }
-  }
-  .name {
-    display: inline-block;
-    color: ${(props) => props.theme.primary};
   }
   .avatar {
     min-width: 55px;
@@ -48,10 +37,8 @@ const DashBoardHeaderStyles = styled.div`
   }
   @media screen and (max-width: 600px) {
     .logo {
-      font-size: 20px;
-      gap: 10px;
       img {
-        max-width: 45px;
+        max-width: 50px;
       }
     }
     .avatar {
@@ -70,8 +57,7 @@ const DashBoardHeader = () => {
   return (
     <DashBoardHeaderStyles>
       <NavLink className="logo" to="/">
-        <img srcSet="/logo.png 2x" alt="" className="logo" />
-        <span className="name">Blogging</span>
+        <img src="/logo.png" alt="" className="logo" />
       </NavLink>
       <div className="header-right">
         <h3>{userInfo?.userName}</h3>

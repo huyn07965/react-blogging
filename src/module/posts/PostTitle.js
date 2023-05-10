@@ -28,6 +28,9 @@ const PostTitleStyles = styled.div`
   a {
     display: block;
   }
+  @media screen and (max-width: 1024px) {
+    margin-top: 0px;
+  }
 `;
 
 const PostTitle = ({
@@ -37,6 +40,7 @@ const PostTitle = ({
   colors = false,
   to = "",
   title = "",
+  large = false,
 }) => {
   return (
     <PostTitleStyles
@@ -45,7 +49,7 @@ const PostTitle = ({
       colors={colors}
       title={title}
     >
-      <NavLink to={`/${to}`}>{children}</NavLink>
+      <NavLink to={`/post/${to}`}>{children}</NavLink>
     </PostTitleStyles>
   );
 };

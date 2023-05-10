@@ -17,46 +17,46 @@ import Author from "../components/author/Author";
 
 const DetailPageStyles = styled.div`
   .content-top {
-    width: 100%;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-top: 30px;
-    padding-bottom: 20px;
+    width: 72%;
+    margin: 0 auto;
   }
   .images {
-    max-width: 550px;
     width: 100%;
-    height: 470px;
-    border-radius: 20px;
-    background-color: #00a7b4;
+    height: 100%;
+    border-radius: 5px;
+    margin-bottom: 20px;
   }
-  .content-newest-top {
-    display: inline-block;
-    margin-bottom: 25px;
-  }
-  .content-right {
-    margin-left: 20px;
+  .title {
+    width: 100%;
+    margin: 10px auto;
   }
   .content-heading {
     font-size: 36px;
     font-weight: 600;
     line-height: 48px;
     color: ${(props) => props.theme.primary};
-    margin-bottom: 20px;
+    margin: 20px 0;
   }
-  .content-info {
-    max-width: 190px;
+  .info-post {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 30px;
   }
   .content-center {
     max-width: 820px;
     margin: 30px auto;
   }
-  .image-chapter {
+  .content-info {
+    font-size: 15px;
+    font-weight: 600;
+  }
+  /* .image-chapter {
     height: 500px;
     border-radius: 20px;
-  }
-  .image-description {
+  } */
+  /* .image-description {
     display: block;
     text-align: center;
     margin: 20px auto;
@@ -64,29 +64,22 @@ const DetailPageStyles = styled.div`
     font-size: 16px;
     color: ${(props) => props.theme.greyDark};
     font-weight: 300;
-  }
-  .post-item {
-    padding-top: 20px;
-    display: grid;
-    grid-template-columns: repeat(4, 280px);
-    column-gap: 10px;
-  }
+  } */
   @media screen and (max-width: 1024px) {
     .content-top {
-      display: flex;
-      justify-content: center;
-      flex-wrap: wrap;
       width: 100%;
     }
     .images {
-      max-width: 100%;
-    }
-    .content-right {
       width: 100%;
-      margin: 30px 0 10px 0;
     }
     .content-center {
       margin: 0 auto;
+    }
+  }
+  @media screen and (max-width: 600px) {
+    .content-heading {
+      font-size: 26px;
+      line-height: 38px;
     }
   }
 `;
@@ -118,47 +111,48 @@ const DetailPage = () => {
   });
   if (!slug) return <NotFoundPage></NotFoundPage>;
   if (!postInfo.title) return null;
-  const date = postInfo?.createdAt?.seconds
-    ? new Date(postInfo?.createdAt?.seconds * 1000)
-    : new Date();
-  const formatDate = new Date(date).toLocaleDateString("vi-VI");
   return (
     <DetailPageStyles>
-      <Layout></Layout>
-      <div className="container">
-        <div className="content-top">
-          <PostImage
-            className="images"
-            url={postInfo?.image}
-            alt="unplash"
-          ></PostImage>
-          <div className="content-right">
-            <PostCategory
-              to={postInfo.category?.slug}
-              className="content-newest-top"
-            >
-              {postInfo?.category?.name}
-            </PostCategory>
-            <PostTitle className="content-heading">{postInfo?.title}</PostTitle>
-            <Postmeta
-              author={postInfo?.user?.fullName}
-              to={slugify(postInfo?.user?.fullName || "", { lower: true })}
-              date={formatDate}
-              className="content-info"
-            ></Postmeta>
+      <Layout>
+        <div className="container">
+          <div className="content-top">
+            <div className="title">
+              <PostTitle className="content-heading" to={postInfo?.slug}>
+                {postInfo?.title}
+              </PostTitle>
+              <div className="info-post">
+                <PostCategory
+                  to={postInfo.category?.slug}
+                  className="content-newest-top"
+                >
+                  {postInfo?.category?.name}
+                </PostCategory>
+                <Postmeta
+                  author={postInfo?.user?.userName}
+                  className="content-info"
+                  to={slugify(postInfo?.user?.fullName || "", { lower: true })}
+                  date={postInfo.createdAt?.seconds}
+                ></Postmeta>
+              </div>
+            </div>
+            <PostImage
+              className="images"
+              url={postInfo?.image}
+              alt="unplash"
+            ></PostImage>
           </div>
+          <div className="content-center">
+            <div
+              className="entry-content"
+              dangerouslySetInnerHTML={{
+                __html: postInfo?.content || "",
+              }}
+            ></div>
+            <Author userId={postInfo?.user?.id}></Author>
+          </div>
+          <PostRelated categoryId={postInfo?.category?.id}></PostRelated>
         </div>
-        <div className="content-center">
-          <div
-            className="entry-content"
-            dangerouslySetInnerHTML={{
-              __html: postInfo?.content || "",
-            }}
-          ></div>
-          <Author userId={postInfo?.user?.id}></Author>
-        </div>
-        <PostRelated categoryId={postInfo?.category?.id}></PostRelated>
-      </div>
+      </Layout>
     </DetailPageStyles>
   );
 };

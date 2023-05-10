@@ -7,12 +7,9 @@ import { useEffect } from "react";
 const HomePageStyles = styled.div``;
 
 const HomePage = () => {
-  useEffect(() => {
-    document.title = "Home Page";
-  });
   return (
     <HomePageStyles>
-      <Layout>
+      <Layout className="layout">
         <HomeBanner></HomeBanner>
         <HomeFeature></HomeFeature>
         <HomeNewest></HomeNewest>

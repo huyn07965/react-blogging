@@ -11,6 +11,7 @@ import Options from "./dropdown/Options";
 import Search from "./dropdown/Search";
 import Select from "./dropdown/Select";
 import Field from "./field/Field";
+import Footer from "./footer/Footer";
 import Header from "./header/Header";
 import Heading from "./header/Heading";
 import Layout from "./header/Layout";
@@ -32,7 +33,6 @@ DropDown.Options = Options;
 DropDown.Search = Search;
 DropDown.Select = Select;
 DropDown.List = List;
-
 export {
   Button,
   CheckBox,
@@ -59,4 +59,5 @@ export {
   ActionEdit,
   Textarea,
   LayoutCategory,
+  Footer,
 };

@@ -18,7 +18,7 @@ const ImageUploadStyles = styled.label`
     props.className === "image-select" &&
     css`
       width: 100%;
-      border-radius: 8px;
+      border-radius: 5px;
       min-height: 200px;
     `};
   position: relative;
@@ -52,7 +52,7 @@ const ImageUploadStyles = styled.label`
     width: 100%;
     height: 100%;
     object-fit: cover;
-    border-radius: 8px;
+    border-radius: 5px;
   }
   .loadingBar {
     position: absolute;

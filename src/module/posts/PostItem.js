@@ -5,14 +5,15 @@ import PostImage from "./PostImage";
 import Postmeta from "./Postmeta";
 import PostTitle from "./PostTitle";
 import slugify from "slugify";
+import useViewport from "../../hooks/useViewPort";
 
 const PostItemStyles = styled.div`
   .image {
     width: 270px;
-    height: 202px;
+    height: 180px;
     display: flex;
     align-items: center;
-    border-radius: 10px;
+    border-radius: 5px;
   }
   .content {
     padding: 20px 0;
@@ -21,14 +22,11 @@ const PostItemStyles = styled.div`
     display: inline-block;
     font-size: 14px;
     font-weight: 500;
-    margin: 0px 0 10px 0;
+    margin: 5px 0 15px 0;
   }
   .content-newest-center {
     max-width: 267px;
-    margin-bottom: 5px;
-  }
-  .content-info {
-    max-width: 180px;
+    margin: 5px 0 15px 0;
   }
   .content-newest-circle {
     width: 6px;
@@ -36,13 +34,26 @@ const PostItemStyles = styled.div`
     border-radius: 50px;
     background-color: ${(props) => props.theme.greyDark};
   }
+  @media screen and (max-width: 600px) {
+    width: 100%;
+    .image {
+      width: 100%;
+      height: 220px;
+    }
+    .content-newest-center {
+      max-width: 100%;
+    }
+  }
+  @media screen and (max-width: 400px) {
+    .image {
+      max-height: 220px;
+    }
+  }
 `;
 
 const PostItem = ({ data }) => {
-  const date = data?.createdAt?.seconds
-    ? new Date(data?.createdAt?.seconds * 1000)
-    : new Date();
-  const formatDate = new Date(date).toLocaleDateString("vi-VI");
+  const viewPort = useViewport();
+  const isMobile = viewPort.width <= 600;
   if (!data || !data.id) return null;
   return (
     <PostItemStyles>
@@ -57,18 +68,27 @@ const PostItem = ({ data }) => {
           <PostCategory to={data.category?.slug} className="content-newest-top">
             {data?.category?.name}
           </PostCategory>
-          <PostTitle
-            to={data.slug}
-            className="content-newest-center"
-            title={data?.title}
-          >
-            {data.title?.slice(0, 20) + "..."}
-          </PostTitle>
+          {!isMobile ? (
+            <PostTitle
+              to={data.slug}
+              className="content-newest-center"
+              title={data?.title}
+            >
+              {data.title?.slice(0, 50) + "..."}
+            </PostTitle>
+          ) : (
+            <PostTitle
+              to={data.slug}
+              className="content-newest-center"
+              title={data?.title}
+            >
+              {data.title?.slice(0, 90) + "..."}
+            </PostTitle>
+          )}
           <Postmeta
             author={data?.user?.userName}
             to={slugify(data?.user?.fullName || "", { lower: true })}
-            date={formatDate}
-            className="content-info"
+            date={data?.createdAt?.seconds}
           ></Postmeta>
         </div>
       </div>

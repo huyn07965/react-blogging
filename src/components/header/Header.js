@@ -36,9 +36,11 @@ const HeaderStyles = styled.header`
   .header-left {
     display: flex;
     align-items: center;
+    flex-wrap: wrap;
+    gap: 10px;
   }
-  .logo {
-    max-width: 80px;
+  .blogging {
+    max-width: 105px;
     object-fit: cover;
     display: block;
   }
@@ -46,7 +48,7 @@ const HeaderStyles = styled.header`
     display: flex;
     align-items: center;
     gap: 20px;
-    margin-left: 40px;
+    margin-left: 20px;
     li {
       list-style: none;
       font-weight: 500;
@@ -102,21 +104,23 @@ const HeaderStyles = styled.header`
   }
   .button {
     max-width: 200px;
-    height: 45px;
+    height: 40px;
     font-weight: 600;
   }
   @media screen and (max-width: 600px) {
     .header-main {
       margin: 0 auto;
+      align-items: flex-end;
     }
-    .logo {
-      max-width: 45px;
+    .header-left {
+      flex-direction: column;
+      align-items: flex-start;
     }
     .menu {
-      gap: 10px;
-      margin-left: 10px;
-      li {
-        font-size: 16px;
+      gap: 20px;
+      margin-left: 0;
+      &-item {
+        padding: 0;
       }
     }
     .avatar {
@@ -129,10 +133,10 @@ const HeaderStyles = styled.header`
     }
     .button {
       width: 100%;
-      padding: 0 10px;
-      height: 35px;
-      font-weight: 600;
-      font-size: 14px;
+      padding: 0 20px;
+      height: 40px;
+      font-weight: 500;
+      font-size: 16px;
     }
   }
 `;
@@ -150,7 +154,7 @@ const Header = () => {
         <div className="header-main">
           <div className="header-left">
             <NavLink to="/">
-              <img src="/logo.png" alt="monkey-blogging" className="logo" />
+              <img src="/blogging.png" alt="blogging" className="blogging" />
             </NavLink>
             <ul className="menu">
               {menuList.map((item) => (

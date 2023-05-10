@@ -48,7 +48,7 @@ const UserManageStyles = styled.div`
     max-width: 300px;
     padding: 16px;
     border: 1px solid ${(props) => props.theme.greyLight};
-    border-radius: 8px;
+    border-radius: 5px;
   }
   .header-button {
     padding: 10px;

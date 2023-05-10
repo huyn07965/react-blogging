@@ -27,7 +27,7 @@ const SignInPageStyles = styled.div`
     max-width: 1000px;
     display: flex;
     justify-content: space-around;
-    border-radius: 8px;
+    border-radius: 5px;
     background-color: #fff;
     padding: 40px 20px;
     box-shadow: 10px 10px 20px rgba(218, 213, 213, 0.15);
@@ -36,23 +36,30 @@ const SignInPageStyles = styled.div`
     display: flex;
     align-items: center;
   }
+  .image-sign-in {
+    width: 450px;
+    height: 580px;
+    opacity: 0.9;
+    background-color: black;
+  }
+  .image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 5px;
+  }
   .logo {
+    max-width: 100px;
     margin: 0 auto;
+    margin-bottom: 40px;
   }
   .content-right {
     display: flex;
     align-items: center;
     flex-direction: column;
   }
-  .heading {
-    font-size: 40px;
-    font-weight: bold;
-    color: ${(props) => props.theme.primary};
-    margin-bottom: 30px;
-  }
   .form {
     max-width: 600px;
-    margin: 0px 20px;
   }
   .have-account {
     margin-bottom: 25px;
@@ -77,9 +84,6 @@ const SignInPageStyles = styled.div`
     padding: 0;
     .container {
       min-height: 100vh;
-    }
-    .heading {
-      font-size: 26px;
     }
   }
 `;
@@ -133,12 +137,18 @@ const SignInPage = () => {
     <SignInPageStyles>
       <div className="container">
         <div className="content-left">
+          <div className="image-sign-in">
+            <img
+              src="https://images.unsplash.com/photo-1661956602139-ec64991b8b16?ixlib=rb-4.0.3&ixid=MnwxMjA3fDF8MHxzZWFyY2h8MXx8Y29udGVudHxlbnwwfHwwfHw%3D&auto=format&fit=crop&w=500&q=60"
+              alt="imagesignin"
+              className="image"
+            />
+          </div>
+        </div>
+        <div className="content-right">
           <Link to="/">
             <img srcSet="/logo.png 2x" alt="" className="logo" />
           </Link>
-        </div>
-        <div className="content-right">
-          <h1 className="heading">Sign In</h1>
           <form
             className="form"
             onSubmit={handleSubmit(handleSignIn)}

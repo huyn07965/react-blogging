@@ -8,15 +8,31 @@ import { db } from "../../firebase-app/firebase-config";
 import PostItem from "./PostItem";
 
 const PostRelatedStyles = styled.div`
-  overflow: auto;
   padding-bottom: 20px;
   .heading {
     margin-bottom: 20px;
-    color: ${(props) => props.theme.blueDark};
+    color: ${(props) => props.theme.primary};
+  }
+  .post-item {
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    column-gap: 20px;
+  }
+  @media screen and (max-width: 1324px) {
+    .post-item {
+      overflow: auto;
+    }
   }
   @media screen and (max-width: 1024px) {
     .heading {
       margin-bottom: 10px;
+    }
+  }
+  @media screen and (max-width: 600px) {
+    .post-item {
+      flex-wrap: wrap;
+      overflow: hidden;
     }
   }
 `;

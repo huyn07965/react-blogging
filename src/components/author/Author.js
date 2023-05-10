@@ -59,7 +59,7 @@ const Author = ({ userId = "" }) => {
     <AuthorStyles>
       <PostImage
         className="image-author"
-        url={user.avatar}
+        url={user.avatar || "/user.jpg"}
         alt="author"
       ></PostImage>
       <div className="info-author">

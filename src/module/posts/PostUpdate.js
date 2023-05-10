@@ -320,7 +320,7 @@ const PostUpdate = () => {
           isLoading={isSubmitting}
           disabled={isSubmitting}
         >
-          Update post
+          Update Post
         </Button>
       </form>
     </PostUpdateStyles>

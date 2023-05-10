@@ -17,6 +17,7 @@ import PostItem from "./posts/PostItem";
 import PostManage from "./posts/PostManage";
 import Postmeta from "./posts/Postmeta";
 import PostNewestItems from "./posts/PostNewestItems";
+import PostNewestItemsMore from "./posts/PostNewestItemsMore";
 import PostNewestLarge from "./posts/PostNewestLarge";
 import PostRelated from "./posts/PostRelated";
 import PostTitle from "./posts/PostTitle";
@@ -39,6 +40,7 @@ export {
   PostItem,
   PostNewestItems,
   PostNewestLarge,
+  PostNewestItemsMore,
   Postmeta,
   PostManage,
   PostUpdate,

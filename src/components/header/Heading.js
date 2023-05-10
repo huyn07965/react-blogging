@@ -2,19 +2,19 @@ import React from "react";
 import styled from "styled-components";
 
 const HeadingStyles = styled.div`
-  margin-bottom: 20px;
+  margin-bottom: 10px;
   font-size: 28px;
   font-weight: 600;
-  color: ${(props) => props.theme.blueDark};
+  color: ${(props) => props.theme.primary};
   .line-heading {
     background-color: ${(props) => props.theme.blueLight};
     height: 3px;
-    width: 35px;
+    width: 50px;
     border-radius: 1px;
-    margin-bottom: 20px;
+    margin-bottom: 10px;
   }
   @media screen and (max-width: 600px) {
-    font-size: 22px;
+    font-size: 24px;
   }
 `;
 

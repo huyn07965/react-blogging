@@ -4,13 +4,14 @@ import { Button } from "../../components";
 
 const HomeBannerStyles = styled.div`
   width: 100%;
-  background-image: linear-gradient(
+  /* background-image: linear-gradient(
     to right bottom,
     ${(props) => props.theme.primary},
     ${(props) => props.theme.secondary}
-  );
+  ); */
+  background-image: url("/bg-img.png");
+  background-size: cover;
   padding: 20px 20px;
-  margin-top: -15px;
   margin-bottom: 50px;
   .banner {
     width: 100%;
@@ -24,7 +25,7 @@ const HomeBannerStyles = styled.div`
     width: 100%;
     max-width: 400px;
     height: 100%;
-    color: white;
+    color: black;
     line-height: 27px;
   }
   .title-banner {
@@ -32,42 +33,62 @@ const HomeBannerStyles = styled.div`
     font-weight: 700;
     line-height: 58px;
     margin-bottom: 20px;
+    color: ${(props) => props.theme.primary};
   }
   .content-banner {
-    font-size: 14px;
-    font-weight: 400;
+    font-size: 22px;
+    font-weight: 500;
     line-height: 27px;
     margin-bottom: 40px;
+    white-space: nowrap;
+    padding-right: 10px;
   }
   .button-banner {
-    max-width: 230px;
+    max-width: 210px;
+    height: 45px;
     margin-bottom: 40px;
   }
-  @media screen and (max-width: 1024px) {
+  @media screen and (max-width: 1280px) {
     margin-bottom: 30px;
     padding: 0;
     .banner {
       padding: 20px 20px;
     }
     .title-banner {
-      font-size: 22px;
+      font-size: 30px;
       font-weight: 700;
       line-height: 58px;
       margin-bottom: 10px;
       white-space: nowrap;
     }
+    .content-banner {
+      font-size: 18px;
+      font-weight: 500;
+      white-space: pre-wrap;
+      margin-bottom: 20px;
+    }
     .button-banner {
       max-width: 110px;
       padding: 0 5px;
-      height: 35px;
+      height: 40px;
       margin-bottom: 40px;
-      font-size: 14px;
+      font-weight: 500;
+      font-size: 16px;
     }
   }
+
   @media screen and (max-width: 650px) {
     margin-bottom: 30px;
+    .container {
+      height: 250px;
+      display: grid;
+      place-items: center;
+    }
     .banner {
-      padding: 10px 20px;
+      padding: 10px 0;
+    }
+    .title-banner {
+      font-size: 26px;
     }
     .content-banner {
       display: none;
@@ -83,22 +104,15 @@ const HomeBanner = () => {
           <div className="banner-left">
             <h2 className="title-banner">Blogging</h2>
             <p className="content-banner">
-              Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do
-              eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut
-              enim ad minim veniam, quis nostrud exercitation ullamco laboris
-              nisi ut aliquip ex ea commodo consequat.
+              Viết - Chia sẻ - Kết nối - Chiêm nghiệm <br></br>
+              <br></br>Tất cả tại Blogging
             </p>
-            <Button
-              type="button"
-              to="/sign-up"
-              kind="secondary"
-              className="button-banner"
-            >
+            <Button type="button" to="/sign-up" className="button-banner">
               Get Started
             </Button>
           </div>
           <div className="banner-right">
-            <img src="./Illustration.png" className="image-banner" alt="" />
+            <img src="./banner-img.png" className="image-banner" alt="" />
           </div>
         </div>
       </div>

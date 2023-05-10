@@ -10,7 +10,7 @@ const ToggleStyles = styled.label`
     cursor: pointer;
     border-radius: 50px;
     transition: all;
-    background-color: ${(props) => props.theme.greybf};
+    background-color: ${(props) => props.theme.greyLight};
   }
   .toggle-active {
     background-color: ${(props) => props.theme.primary};

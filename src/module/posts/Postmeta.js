@@ -6,7 +6,7 @@ const PostmetaStyles = styled.div`
   color: #6b6b6b;
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  gap: 15px;
   font-size: 14px;
   font-weight: 600;
   color: inherit;
@@ -21,6 +21,9 @@ const PostmetaStyles = styled.div`
         background-color: #fff;
       `};
   }
+  @media screen and (max-width: 1024px) {
+    margin-top: 0px;
+  }
 `;
 const Postmeta = ({
   date = "Mar 23",
@@ -29,9 +32,11 @@ const Postmeta = ({
   colors = false,
   to = "",
 }) => {
+  const dateMeta = date ? new Date(date * 1000) : new Date();
+  const formatDate = new Date(dateMeta).toLocaleDateString("vi-VI");
   return (
     <PostmetaStyles className={className} colors={colors} to={to}>
-      <span className="content-date">{date}</span>
+      <span className="content-date">{formatDate}</span>
       <div className="content-circle"></div>
       <NavLink to={`/user/${to}`}>
         <span className="content-name">{author}</span>

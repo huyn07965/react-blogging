@@ -8,11 +8,6 @@ const PostImageStyles = styled.div`
   img {
     width: 100%;
     height: 100%;
-    ${(props) =>
-      props.newestItems === true &&
-      css`
-        height: 130px;
-      `};
     object-fit: cover;
     border-radius: inherit;
   }
@@ -25,13 +20,7 @@ const PostImageStyles = styled.div`
     }
   }
 `;
-const PostImage = ({
-  url = "",
-  alt = "",
-  className = "",
-  newestItems = false,
-  to = "",
-}) => {
+const PostImage = ({ url = "", alt = "", className = "", to = "" }) => {
   // if (to != null) {
   //   return (
   //     <NavLink to={`/${to}`} style={{ display: "block" }}>
@@ -43,8 +32,8 @@ const PostImage = ({
   // }
 
   return (
-    <NavLink to={`/${to}`} className={className}>
-      <PostImageStyles className={className} newestItems={newestItems}>
+    <NavLink to={`/post/${to}`}>
+      <PostImageStyles className={className}>
         <img src={url} alt={alt} loading="lazy" />
       </PostImageStyles>
       <div className="post-overlay"></div>

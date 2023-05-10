@@ -28,7 +28,8 @@ const UserInfoStyles = styled.div`
     font-weight: 600;
   }
   .sign-out {
-    max-width: 160px;
+    max-width: 150px;
+    height: 45px;
   }
   .infomation {
     display: flex;
@@ -138,6 +139,10 @@ const UserInfoStyles = styled.div`
     .header-user {
       margin: 20px 0;
     }
+    .sign-out {
+      max-width: 110px;
+      height: 40px;
+    }
     .infomation {
       flex-wrap: wrap;
       width: 100%;
@@ -237,7 +242,7 @@ const UserInfo = () => {
                 onClick={() => navigate("/dashboard")}
                 className="sign-out"
               >
-                Manager
+                Manage
               </Button>
             )}
           </div>

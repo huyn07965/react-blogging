@@ -40,7 +40,7 @@ function App() {
           <Route path="/edit-user" element={<UserEdit></UserEdit>}></Route>
           <Route path="/blog" element={<BlogPage></BlogPage>}></Route>
           <Route path="/contact" element={<ContactPage></ContactPage>}></Route>
-          <Route path="/:slug" element={<DetailPage></DetailPage>}></Route>
+          <Route path="/post/:slug" element={<DetailPage></DetailPage>}></Route>
           <Route
             path="/category/:slug"
             element={<CategoryPage></CategoryPage>}

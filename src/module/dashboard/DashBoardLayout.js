@@ -10,9 +10,9 @@ import { useEffect } from "react";
 const DashboardStyles = styled.div`
   max-width: 1600px;
   margin: 0 auto;
-  .dashboard-header {
+  /* .dashboard-header {
     margin-bottom: 120px;
-  }
+  } */
   .dashboard {
     &-heading {
       font-weight: bold;

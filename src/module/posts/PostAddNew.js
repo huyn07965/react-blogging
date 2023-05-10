@@ -151,6 +151,7 @@ const PostAddNew = () => {
       setSelectCategory("");
       setContent("");
       setProgress(0);
+      document.body.scrollIntoView({ behavior: "smooth", block: "start" });
     } catch (erorr) {
       setLoading(false);
     } finally {
@@ -339,7 +340,7 @@ const PostAddNew = () => {
           isLoading={loading}
           disabled={loading}
         >
-          Add new post
+          Add New Post
         </Button>
       </form>
     </PostAddNewStyles>

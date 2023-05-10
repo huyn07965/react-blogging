@@ -10,7 +10,7 @@ const InputStyles = styled.div`
     width: 100%;
     font-weight: 500px;
     border: 1px solid transparent;
-    border-radius: 8px;
+    border-radius: 5px;
     transition: all 0.2s linear;
     background-color: ${(props) => props.theme.greyLight};
     ${(props) =>

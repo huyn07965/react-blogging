@@ -3,7 +3,7 @@ import styled from "styled-components";
 const LabelStatusStyles = styled.span`
   display: inline-block;
   padding: 10px 15px;
-  border-radius: 8px;
+  border-radius: 5px;
   font-size: 14px;
   font-weight: 500;
   &.styleClassName {

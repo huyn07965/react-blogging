@@ -5,14 +5,12 @@ import PostImage from "./PostImage";
 import Postmeta from "./Postmeta";
 import PostTitle from "./PostTitle";
 import slugify from "slugify";
+import useViewport from "../../hooks/useViewPort";
 const PostNewestLargeStyles = styled.div`
-  .newest {
-    margin: 20px auto;
-  }
   .images {
     max-width: 570px;
     height: 375px;
-    border-radius: 15px;
+    border-radius: 5px;
   }
   .content-newest-top {
     display: inline-block;
@@ -25,19 +23,26 @@ const PostNewestLargeStyles = styled.div`
     margin-bottom: 10px;
   }
   .content-info {
-    max-width: 150px;
+    font-size: 16px;
   }
   @media screen and (max-width: 600px) {
+    .images {
+      height: 300px;
+    }
     .content-newest-center {
       font-size: 16px;
     }
-    .content-info {
-      font-size: 14px;
+  }
+  @media screen and (max-width: 400px) {
+    .images {
+      height: 225px;
     }
   }
 `;
 
 const PostNewestLarge = ({ data }) => {
+  const viewPort = useViewport();
+  const isMobile = viewPort.width <= 1224 && viewPort.width >= 1024;
   if (!data.id) return null;
   return (
     <PostNewestLargeStyles>
@@ -51,12 +56,28 @@ const PostNewestLarge = ({ data }) => {
         <PostCategory className="content-newest-top" to={data.category?.slug}>
           {data.category?.name}
         </PostCategory>
-        <PostTitle className="content-newest-center" size="big" to={data?.slug}>
-          {data.title}
-        </PostTitle>
+        {isMobile ? (
+          <PostTitle
+            className="content-newest-center"
+            size="big"
+            to={data?.slug}
+            title={data.title}
+          >
+            {data.title.slice(0, 50) + "..."}
+          </PostTitle>
+        ) : (
+          <PostTitle
+            className="content-newest-center"
+            size="big"
+            to={data?.slug}
+          >
+            {data.title}
+          </PostTitle>
+        )}
         <Postmeta
           className="content-info"
           author={data.user?.userName}
+          date={data.createdAt?.seconds}
           to={slugify(data.user?.fullName || "", { lower: true })}
         ></Postmeta>
       </div>

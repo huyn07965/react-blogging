@@ -145,7 +145,7 @@ const CategoryUpdate = () => {
           isLoading={isSubmitting}
           disabled={isSubmitting}
         >
-          Update category
+          Update Category
         </Button>
       </form>
     </CategoryUpdateStyles>

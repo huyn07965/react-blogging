@@ -6,7 +6,7 @@ const PostCategoryStyles = styled.div`
   ${(props) =>
     props.type === "primary" &&
     css`
-      background-color: ${(props) => props.theme.purpleLight};
+      background-color: ${(props) => props.theme.greenLight};
     `};
   ${(props) =>
     props.type === "secondary" &&
@@ -14,8 +14,9 @@ const PostCategoryStyles = styled.div`
       background-color: #fff;
     `};
   color: ${(props) => props.theme.greyDark};
-  border-radius: 10px;
+  border-radius: 5px;
   padding: 4px 10px;
+  display: inline-block;
   a {
     display: block;
   }

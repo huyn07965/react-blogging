@@ -71,9 +71,9 @@ const CategoryAddNew = () => {
         ...newValues,
         createdAt: serverTimestamp(),
       });
-      toast.success("Add new posts successfully!");
+      toast.success("Add new category successfully!");
     } catch (erorr) {
-      toast.success("Add new posts fail!");
+      toast.success("Add new category fail!");
     } finally {
       reset({
         name: "",

@@ -25,7 +25,7 @@ const SignUpStyles = styled.div`
   background-color: ${(props) => props.theme.greenLight};
   .container {
     max-width: 1000px;
-    border-radius: 8px;
+    border-radius: 5px;
     background-color: #fff;
     padding: 40px 30px;
     box-shadow: 10px 10px 20px rgba(218, 213, 213, 0.15);

@@ -168,7 +168,7 @@ const CategoryManage = () => {
             className="header-button"
             height="52px"
           >
-            Add new
+            Add New
           </Button>
         </div>
       </DashboardHeading>
