@@ -181,7 +181,6 @@ const HomeNewest = () => {
   const [first, ...other] = posts;
   const newest = posts.slice(1, 4);
   const newestMore = posts.slice(4);
-  console.log("post", newest);
   if (posts?.length <= 0) return null;
   return (
     <HomeNewestStyles>

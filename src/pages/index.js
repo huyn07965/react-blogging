@@ -5,6 +5,7 @@ import DashBoardPage from "./DashBoardPage";
 import DetailPage from "./DetailPage";
 import HomePage from "./HomePage";
 import NotFoundPage from "./NotFoundPage";
+import SearchPage from "./SearchPage";
 import SignInPage from "./SignInPage";
 import SignUpPage from "./SignUpPage";
 import UserPage from "./UserPage";
@@ -20,4 +21,5 @@ export {
   UserPage,
   ContactPage,
   BlogPage,
+  SearchPage,
 };

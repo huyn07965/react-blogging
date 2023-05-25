@@ -28,6 +28,7 @@ import Pagination from "./pagination/Pagination";
 import Table from "./table/Table";
 import Textarea from "./textarea/Textarea";
 import Toggle from "./toggle/Toggle";
+import WatchLater from "./watchlater/WatchLater";
 
 DropDown.Options = Options;
 DropDown.Search = Search;
@@ -60,4 +61,5 @@ export {
   Textarea,
   LayoutCategory,
   Footer,
+  WatchLater,
 };

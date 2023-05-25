@@ -2,7 +2,6 @@ import React from "react";
 import styled from "styled-components";
 import { Layout } from "../components";
 import { HomeBanner, HomeFeature, HomeNewest } from "../module";
-import { useEffect } from "react";
 
 const HomePageStyles = styled.div``;
 

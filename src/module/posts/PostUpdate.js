@@ -147,7 +147,7 @@ const PostUpdate = () => {
     setSelectCategory(item);
   };
 
-  const handleUpdateCategory = async (values) => {
+  const handleUpdatePost = async (values) => {
     const colRef = doc(db, "posts", postId);
     values.slug = slugify(values.slug || values.title, { lower: true });
     values.status = Number(values.status);
@@ -209,7 +209,7 @@ const PostUpdate = () => {
         title="Update Post"
         desc="Manage your post"
       ></DashboardHeading>
-      <form onSubmit={handleSubmit(handleUpdateCategory)}>
+      <form onSubmit={handleSubmit(handleUpdatePost)}>
         <div className="update-post">
           <Field>
             <Label htmlFor="title">Title</Label>

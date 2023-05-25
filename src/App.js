@@ -8,6 +8,7 @@ import {
   DetailPage,
   HomePage,
   NotFoundPage,
+  SearchPage,
   SignInPage,
   SignUpPage,
   UserPage,
@@ -39,6 +40,7 @@ function App() {
           <Route path="/userInfo" element={<UserInfo></UserInfo>}></Route>
           <Route path="/edit-user" element={<UserEdit></UserEdit>}></Route>
           <Route path="/blog" element={<BlogPage></BlogPage>}></Route>
+          <Route path="/search" element={<SearchPage></SearchPage>}></Route>
           <Route path="/contact" element={<ContactPage></ContactPage>}></Route>
           <Route path="/post/:slug" element={<DetailPage></DetailPage>}></Route>
           <Route

@@ -53,7 +53,6 @@ const Author = ({ userId = "" }) => {
     }
     fetchData();
   }, [userId]);
-  console.log(user);
   if (!userId) return null;
   return (
     <AuthorStyles>

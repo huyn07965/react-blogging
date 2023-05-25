@@ -5,6 +5,17 @@ import PostImage from "./PostImage";
 import Postmeta from "./Postmeta";
 import PostTitle from "./PostTitle";
 import slugify from "slugify";
+import { db } from "../../firebase-app/firebase-config";
+import { useAuth } from "../../contexts/auth-context";
+import {
+  doc,
+  getDoc,
+  serverTimestamp,
+  setDoc,
+  update,
+  updateDoc,
+} from "firebase/firestore";
+import { WatchLater } from "../../components";
 
 const PostNewestItemsMoreStyles = styled.div`
   width: 100%;
