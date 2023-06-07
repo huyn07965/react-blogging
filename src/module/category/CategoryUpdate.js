@@ -88,6 +88,7 @@ const CategoryUpdate = () => {
     });
     setNewSlug(slugify(values.slug, { lower: true }));
     toast.success(`${t("toastUpdateCategory")}`);
+    navigate("/manage/category");
   };
   useEffect(() => {
     const arrErros = Object.values(errors);
@@ -100,35 +101,35 @@ const CategoryUpdate = () => {
   }, [errors]);
   const watchStatus = watch("status");
 
-  useEffect(() => {
-    if (prevSlug !== newSlug) {
-      async function fetchData() {
-        const colRef = collection(db, "posts");
-        const docPost = query(colRef, where("category.slug", "==", prevSlug));
-        onSnapshot(docPost, (snapshot) => {
-          let result = [];
-          snapshot.forEach((doc) => {
-            result.push({
-              id: doc.id,
-              ...doc.data(),
-            });
-          });
-          result.map((item) => {
-            const colRef = doc(db, "posts", item.id);
-            updateDoc(colRef, {
-              category: {
-                id: item?.category?.id,
-                slug: newSlug,
-              },
-            });
-          });
-        });
-      }
-      fetchData();
-      navigate("/manage/category");
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [newSlug.length > 0]);
+  // useEffect(() => {
+  //   if (prevSlug !== newSlug) {
+  //     async function fetchData() {
+  //       const colRef = collection(db, "posts");
+  //       const docPost = query(colRef, where("category.slug", "==", prevSlug));
+  //       onSnapshot(docPost, (snapshot) => {
+  //         let result = [];
+  //         snapshot.forEach((doc) => {
+  //           result.push({
+  //             id: doc.id,
+  //             ...doc.data(),
+  //           });
+  //         });
+  //         result.map((item) => {
+  //           const colRef = doc(db, "posts", item.id);
+  //           updateDoc(colRef, {
+  //             category: {
+  //               id: item?.category?.id,
+  //               slug: newSlug,
+  //             },
+  //           });
+  //         });
+  //       });
+  //     }
+  //     fetchData();
+
+  //   }
+  //   // eslint-disable-next-line react-hooks/exhaustive-deps
+  // }, [newSlug.length > 0]);
   useEffect(() => {
     document.title = "Category Update Page";
   });
