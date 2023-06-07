@@ -5,17 +5,12 @@ import PostImage from "./PostImage";
 import Postmeta from "./Postmeta";
 import PostTitle from "./PostTitle";
 import slugify from "slugify";
-import { db } from "../../firebase-app/firebase-config";
 import { useAuth } from "../../contexts/auth-context";
-import {
-  doc,
-  getDoc,
-  serverTimestamp,
-  setDoc,
-  update,
-  updateDoc,
-} from "firebase/firestore";
-import { WatchLater } from "../../components";
+import SavePost from "../../components/savepost/SavePost";
+import { useNavigate } from "react-router-dom";
+import useSavePost from "../../hooks/useSavePost";
+import useGetCategory from "../../hooks/useGetCategory";
+import useGetUserPost from "../../hooks/useGetUserPost";
 
 const PostNewestItemsMoreStyles = styled.div`
   width: 100%;
@@ -41,7 +36,10 @@ const PostNewestItemsMoreStyles = styled.div`
     min-height: 160px;
   }
   .content-newest-top {
-    display: inline-block;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
     font-size: 16px;
   }
   .content-newest-center {
@@ -84,6 +82,11 @@ const PostNewestItemsMoreStyles = styled.div`
 `;
 
 const PostNewestItemsMore = ({ data }) => {
+  const { userInfo } = useAuth();
+  const navigate = useNavigate();
+  const { category } = useGetCategory(data?.category?.id);
+  const { user } = useGetUserPost(data?.user?.id);
+  const { handleWatchLater, savePost } = useSavePost(data.id);
   if (!data.id) return null;
   return (
     <PostNewestItemsMoreStyles>
@@ -96,9 +99,14 @@ const PostNewestItemsMore = ({ data }) => {
           to={data?.slug}
         ></PostImage>
         <div className="content">
-          <PostCategory className="content-newest-top" to={data.category?.slug}>
-            {data.category?.name}
-          </PostCategory>
+          <div className="content-newest-top">
+            <PostCategory to={category?.slug}>{category?.name}</PostCategory>
+            <SavePost
+              onClick={userInfo ? handleWatchLater : () => navigate("/sign-in")}
+              savePost={savePost}
+              data={data.id}
+            ></SavePost>
+          </div>
           <PostTitle
             className="content-newest-center"
             to={data?.slug}
@@ -110,9 +118,10 @@ const PostNewestItemsMore = ({ data }) => {
           </PostTitle>
           <Postmeta
             className="content-info"
-            author={data.user?.userName}
+            author={user?.userName}
             date={data.createdAt?.seconds}
-            to={slugify(data.user?.fullName || "", { lower: true })}
+            to={slugify(user?.slug || "", { lower: true })}
+            // to={user?.id}
           ></Postmeta>
         </div>
       </div>

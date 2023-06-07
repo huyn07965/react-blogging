@@ -6,6 +6,13 @@ import Postmeta from "./Postmeta";
 import PostTitle from "./PostTitle";
 import slugify from "slugify";
 import useViewport from "../../hooks/useViewPort";
+import SavePost from "../../components/savepost/SavePost";
+import { useAuth } from "../../contexts/auth-context";
+import { useNavigate } from "react-router-dom";
+import useSavePost from "../../hooks/useSavePost";
+import useGetCategory from "../../hooks/useGetCategory";
+import useGetUserPost from "../../hooks/useGetUserPost";
+
 const PostNewestLargeStyles = styled.div`
   .images {
     max-width: 570px;
@@ -13,10 +20,13 @@ const PostNewestLargeStyles = styled.div`
     border-radius: 5px;
   }
   .content-newest-top {
-    display: inline-block;
+    margin: 15px 0;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
     font-size: 14px;
     font-weight: 500;
-    margin: 15px 0;
   }
   .content-newest-center {
     max-width: 570px;
@@ -41,6 +51,11 @@ const PostNewestLargeStyles = styled.div`
 `;
 
 const PostNewestLarge = ({ data }) => {
+  const { userInfo } = useAuth();
+  const navigate = useNavigate();
+  const { category } = useGetCategory(data?.category?.id);
+  const { user } = useGetUserPost(data?.user?.id);
+  const { handleWatchLater, savePost } = useSavePost(data?.id);
   const viewPort = useViewport();
   const isMobile = viewPort.width <= 1224 && viewPort.width >= 1024;
   if (!data.id) return null;
@@ -53,9 +68,14 @@ const PostNewestLarge = ({ data }) => {
           alt="unplash"
           to={data?.slug}
         ></PostImage>
-        <PostCategory className="content-newest-top" to={data.category?.slug}>
-          {data.category?.name}
-        </PostCategory>
+        <div className="content-newest-top">
+          <PostCategory to={data.category?.slug}>{category?.name}</PostCategory>
+          <SavePost
+            onClick={userInfo ? handleWatchLater : () => navigate("/sign-in")}
+            savePost={savePost}
+            data={data.id}
+          ></SavePost>
+        </div>
         {isMobile ? (
           <PostTitle
             className="content-newest-center"
@@ -76,7 +96,7 @@ const PostNewestLarge = ({ data }) => {
         )}
         <Postmeta
           className="content-info"
-          author={data.user?.userName}
+          author={user?.userName}
           date={data.createdAt?.seconds}
           to={slugify(data.user?.fullName || "", { lower: true })}
         ></Postmeta>

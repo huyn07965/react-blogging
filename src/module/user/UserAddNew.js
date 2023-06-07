@@ -18,6 +18,7 @@ import { useAuth } from "../../contexts/auth-context";
 import { roleStatus } from "../../utils/constants";
 import * as yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
+import { useTranslation } from "react-i18next";
 
 const UserAddNewStyles = styled.div`
   .user-layout {
@@ -55,6 +56,7 @@ const schema = yup.object({
 });
 const UserAddNew = () => {
   const { userInfo } = useAuth();
+  const { t } = useTranslation();
   const {
     control,
     handleSubmit,
@@ -73,7 +75,7 @@ const UserAddNew = () => {
     if (!isValid) return null;
     await createUserWithEmailAndPassword(auth, values.email, values.password);
     // await updateProfile(auth.currentUser, { displayName: values.fullName });
-    toast.success("Register user sucessfully!!");
+    toast.success(`${t("toastCreateUser")}`);
     await setDoc(doc(db, "users", auth.currentUser.uid), {
       fullName: values.fullName,
       email: values.email,
@@ -88,6 +90,7 @@ const UserAddNew = () => {
       status: 1,
       avatar: "/user.jpg",
       createdAt: serverTimestamp(),
+      watchLater: [],
     });
   };
   useEffect(() => {
@@ -105,38 +108,41 @@ const UserAddNew = () => {
   if (userInfo?.role !== roleStatus.Admin) return null;
   return (
     <UserAddNewStyles>
-      <DashboardHeading title="New User" desc="Add New User"></DashboardHeading>
+      <DashboardHeading
+        title={t("newUser")}
+        desc={t("addNewUser")}
+      ></DashboardHeading>
       <form onSubmit={handleSubmit(handleAddUser)}>
         <div className="user-layout">
           <Field>
-            <Label htmlFor="email">Email</Label>
+            <Label htmlFor="email">{t("email")}</Label>
             <Input
               control={control}
               name="email"
-              placeholder="Enter your category name"
+              placeholder={t("emailPlace")}
             ></Input>
           </Field>
           <Field>
-            <Label htmlFor="fullName">Full Name</Label>
+            <Label htmlFor="fullName">{t("fullName")}</Label>
             <Input
               control={control}
               name="fullName"
-              placeholder="Enter your slug"
+              placeholder={t("fullNamePlace")}
             ></Input>
           </Field>
         </div>
         <div className="user-layout">
           <Field>
-            <Label htmlFor="userName">User Name</Label>
+            <Label htmlFor="userName">{t("userName")}</Label>
             <Input
-              placeholder="Enter user Name"
+              placeholder={t("userNamePlace")}
               type="text"
               name="userName"
               control={control}
             />
           </Field>
           <Field>
-            <Label htmlFor="userName">Password</Label>
+            <Label htmlFor="userName">{t("pass")}</Label>
             <InputPasswordToogle control={control}></InputPasswordToogle>
           </Field>
         </div>
@@ -147,7 +153,7 @@ const UserAddNew = () => {
           isLoading={isSubmitting}
           disabled={isSubmitting}
         >
-          Add New User
+          {t("addNewUser")}
         </Button>
       </form>
     </UserAddNewStyles>

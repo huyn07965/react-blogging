@@ -6,6 +6,7 @@ import { useEffect } from "react";
 import { collection, onSnapshot, query, where } from "firebase/firestore";
 import { db } from "../../firebase-app/firebase-config";
 import PostItem from "./PostItem";
+import { useTranslation } from "react-i18next";
 
 const PostRelatedStyles = styled.div`
   padding-bottom: 20px;
@@ -37,6 +38,7 @@ const PostRelatedStyles = styled.div`
   }
 `;
 const PostRelated = ({ categoryId = "" }) => {
+  const { t } = useTranslation();
   const [post, setPost] = useState([]);
   useEffect(() => {
     const docRef = query(
@@ -57,7 +59,7 @@ const PostRelated = ({ categoryId = "" }) => {
   if (!categoryId) return null;
   return (
     <PostRelatedStyles>
-      <Heading className="heading">Bài viết liên quan</Heading>
+      <Heading className="heading">{t("related")}</Heading>
       <div>
         <div className="post-item">
           {post?.length > 0 &&

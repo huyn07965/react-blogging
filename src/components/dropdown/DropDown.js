@@ -1,6 +1,7 @@
 import React from "react";
-import styled from "styled-components";
+import styled, { css } from "styled-components";
 import { DropdownProvider } from "./dropdown-context";
+import { language } from "../../utils/constants";
 const DropDownStyles = styled.div`
   position: relative;
   display: inline-block;
@@ -9,11 +10,25 @@ const DropDownStyles = styled.div`
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 20px;
     background-color: #e7ecf3;
     border-radius: 4px;
     cursor: pointer;
     font-size: 16px;
+    padding: 20px;
+    ${(props) =>
+      props.translate &&
+      css`
+        padding: 6px 10px;
+        display: flex;
+        align-items: center;
+        justify-content: space-around;
+        gap: 10px;
+      `};
+    img {
+      object-fit: cover;
+      max-width: 20px;
+      height: 15px;
+    }
   }
   .icon {
     height: 25px;
@@ -30,10 +45,10 @@ const DropDownStyles = styled.div`
   }
 `;
 
-const DropDown = ({ children, ...props }) => {
+const DropDown = ({ children, translate = "", className = "", ...props }) => {
   return (
     <DropdownProvider {...props}>
-      <DropDownStyles>{children}</DropDownStyles>
+      <DropDownStyles translate={translate}>{children}</DropDownStyles>
     </DropdownProvider>
   );
 };

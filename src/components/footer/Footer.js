@@ -1,6 +1,8 @@
 import React from "react";
 import styled from "styled-components";
 import Button from "../button/Button";
+import { useTranslation } from "react-i18next";
+import { Link } from "react-router-dom";
 const FooterStyles = styled.div`
   width: 100%;
   min-height: 220px;
@@ -17,6 +19,21 @@ const FooterStyles = styled.div`
     padding-top: 10px;
   }
   .footer {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    justify-content: center;
+    h3 {
+      font-size: 20px;
+      font-weight: 600;
+      color: ${(props) => props.theme.primary};
+    }
+    p {
+      font-weight: 400;
+    }
+  }
+  .footerLast {
+    max-width: 320px;
     display: flex;
     flex-direction: column;
     gap: 15px;
@@ -50,35 +67,34 @@ const FooterStyles = styled.div`
   }
 `;
 const Footer = () => {
+  const { t } = useTranslation();
   return (
     <FooterStyles>
       <div className="container">
         <div className="footer">
           <h3>Blogging</h3>
-          <p>Address: An Phu Dong, District 12</p>
-          <p>Mail: huyn07965@gmail.com</p>
-          <p>Phone: 0365113450</p>
+          <p>{t("address")}: An Phu Dong, District 12</p>
+          <p>{t("email")}: huyn07965@gmail.com</p>
+          <p>{t("phone")}: 0365113450</p>
         </div>
         <div className="footer">
-          <h3>Infomation</h3>
-          <p>Company</p>
+          <h3>{t("info")}</h3>
+          <Link>{t("company")}</Link>
           <p>CEO</p>
-          <p>About Us</p>
+          <Link to="/contact">{t("about")}</Link>
         </div>
         <div className="footer">
-          <h3>Account</h3>
-          <p>Sign In</p>
-          <p>Sign Up</p>
-          <p>Support</p>
+          <h3>{t("account")}</h3>
+          <Link to="/sign-in">{t("signIn")}</Link>
+          <Link to="/sign-up">{t("signUp")}</Link>
+          <Link>{t("support")}</Link>
         </div>
-        <div className="footer">
-          <h3>Contact</h3>
-          <p>
-            All inquiries, please contact us <br></br>via the input box below
-          </p>
+        <div className="footerLast">
+          <h3>{t("contact")}</h3>
+          <p>{t("contactText")}</p>
           <div className="input-contact">
-            <input type="text" name="lh" placeholder="input your text" />
-            <Button className="button-contact">Send</Button>
+            <input type="text" name="lh" placeholder={t("inputContact")} />
+            <Button className="button-contact">{t("send")}</Button>
           </div>
         </div>
       </div>

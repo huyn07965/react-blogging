@@ -16,6 +16,7 @@ import {
   Label,
 } from "../components";
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 
 const SignInPageStyles = styled.div`
   min-height: 100vh;
@@ -106,6 +107,7 @@ const SignInPage = () => {
     mode: "onChange",
     resolver: yupResolver(schema),
   });
+  const { t } = useTranslation();
   const { userInfo } = useAuth();
   const navigate = useNavigate();
   const [error, setError] = useState(false);
@@ -118,7 +120,7 @@ const SignInPage = () => {
     await signInWithEmailAndPassword(auth, values.email, values.password)
       .then(() => {
         navigate("/");
-        toast.success("Sign in Successfull!");
+        toast.success(`${t("signUpSuccess")}`);
       })
       .catch((error) => {
         setError(true);
@@ -155,16 +157,16 @@ const SignInPage = () => {
             autoComplete="off"
           >
             <Field>
-              <Label htmlFor="email">Email Address</Label>
+              <Label htmlFor="email">{t("email")}</Label>
               <Input
-                placeholder="Enter your Email"
+                placeholder={t("emailPlace")}
                 type="email"
                 name="email"
                 control={control}
               />
             </Field>
             <Field>
-              <Label htmlFor="password">Password</Label>
+              <Label htmlFor="password">{t("pass")}</Label>
               <InputPasswordToogle control={control}></InputPasswordToogle>
               {error && (
                 <h3 className="error">
@@ -173,8 +175,8 @@ const SignInPage = () => {
               )}
             </Field>
             <div className="have-account">
-              You have not had an account?{" "}
-              <NavLink to="/sign-up">Register an account</NavLink>
+              {t("titleNotAccount")}{" "}
+              <NavLink to="/sign-up">{t("titleRegister")}</NavLink>
             </div>
             <Button
               type="submit"
@@ -182,7 +184,7 @@ const SignInPage = () => {
               disabled={isSubmitting}
               style={{ maxWidth: 300, margin: "0 auto" }}
             >
-              Sign in
+              {t("signIn")}
             </Button>
           </form>
         </div>

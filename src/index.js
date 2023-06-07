@@ -9,18 +9,23 @@ import { createRoot } from "react-dom/client";
 import { theme } from "./utils/constants";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import { Provider } from "react-redux";
+import store from "./store/configureStore";
+import "./i18next";
 const container = document.getElementById("root");
 const root = createRoot(container);
 
 root.render(
   <React.StrictMode>
-    <ThemeProvider theme={theme}>
-      <GlobalStyles></GlobalStyles>
-      <BrowserRouter>
-        <App />
-        <ToastContainer></ToastContainer>
-      </BrowserRouter>
-    </ThemeProvider>
+    <Provider store={store}>
+      <ThemeProvider theme={theme}>
+        <GlobalStyles></GlobalStyles>
+        <BrowserRouter>
+          <App />
+          <ToastContainer></ToastContainer>
+        </BrowserRouter>
+      </ThemeProvider>
+    </Provider>
   </React.StrictMode>
 );
 

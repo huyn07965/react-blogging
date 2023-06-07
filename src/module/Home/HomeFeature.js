@@ -10,6 +10,7 @@ import styled from "styled-components";
 import { Heading } from "../../components";
 import { db } from "../../firebase-app/firebase-config";
 import PostItem from "../posts/PostItem";
+import { useTranslation } from "react-i18next";
 
 const HomeFeatureStyles = styled.div`
   .feature {
@@ -46,6 +47,7 @@ const HomeFeatureStyles = styled.div`
 `;
 const HomeFeature = () => {
   const [post, setPost] = useState([]);
+  const { t } = useTranslation();
   useEffect(() => {
     const colRef = collection(db, "posts");
     const queries = query(
@@ -71,7 +73,7 @@ const HomeFeature = () => {
       <div className="container">
         <div className="feature">
           <div className="title">
-            <Heading>Feature</Heading>
+            <Heading>{t("feature")}</Heading>
           </div>
           <div className="content-feature">
             {post?.map((item) => (
@@ -79,15 +81,6 @@ const HomeFeature = () => {
             ))}
           </div>
         </div>
-
-        {/* <div className="feaure">
-          <div className="post-item">
-            <PostItem></PostItem>
-            <PostItem></PostItem>
-            <PostItem></PostItem>
-            <PostItem></PostItem>
-          </div>
-        </div> */}
       </div>
     </HomeFeatureStyles>
   );

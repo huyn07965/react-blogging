@@ -18,6 +18,7 @@ import {
   ImageUpload,
   Input,
   Label,
+  Layout,
   Radio,
   Toggle,
 } from "../../components";
@@ -77,8 +78,7 @@ const schema = yup.object({
     .min(50, "Title must be least 50 characters"),
   slug: yup.string().required("Please enter slug"),
 });
-const PostUpdate = () => {
-  const { userInfo } = useAuth();
+const UserUpdatePost = () => {
   const { t } = useTranslation();
   const [params] = useSearchParams();
   const postId = params.get("id");
@@ -170,7 +170,7 @@ const PostUpdate = () => {
       content,
     });
     toast.success(`${t("toastUpdatePost")}`);
-    navigate("/manage/post");
+    navigate("/user-post");
   };
   const modules = useMemo(
     () => ({
@@ -214,130 +214,121 @@ const PostUpdate = () => {
   useEffect(() => {
     document.title = "Post Update Page";
   });
+  const renderStatus = (status) => {
+    switch (status) {
+      case 1:
+        return <p>Approved</p>;
+      case 2:
+        return <p p>Pending</p>;
+      case 3:
+        return <p>Reject</p>;
+      default:
+        break;
+    }
+  };
   if (!postId) return null;
-  if (userInfo?.role !== roleStatus.Admin) return null;
   return (
-    <PostUpdateStyles>
-      <DashboardHeading
-        title={t("updatePost")}
-        desc={`${t("updatePostId")} ${postId}`}
-      ></DashboardHeading>
-      <form onSubmit={handleSubmit(handleUpdatePost)}>
-        <div className="update-post">
-          <Field>
-            <Label htmlFor="title">{t("title")}</Label>
-            <Input
-              control={control}
-              placeholder={t("titlePlace")}
-              name="title"
-            ></Input>
-          </Field>
-          <Field>
-            <Label htmlFor="slug">{t("slug")}</Label>
-            <Input
-              control={control}
-              placeholder={t("slugPlace")}
-              name="slug"
-            ></Input>
-          </Field>
-        </div>
-        <div className="update-post">
-          <Field>
-            <Label>{t("status")}</Label>
-            <div className="status">
-              <Radio
-                name="status"
-                control={control}
-                checked={Number(watchStatus) === postValue.Approved}
-                onClick={() => setValue("status", "approved")}
-                value={postValue.Approved}
-              >
-                Approved
-              </Radio>
-              <Radio
-                name="status"
-                control={control}
-                checked={Number(watchStatus) === postValue.Pending}
-                onClick={() => setValue("status", "pending")}
-                value={postValue.Pending}
-              >
-                Pending
-              </Radio>
-              <Radio
-                name="status"
-                control={control}
-                checked={Number(watchStatus) === postValue.Reject}
-                onClick={() => setValue("status", "reject")}
-                value={postValue.Reject}
-              >
-                Reject
-              </Radio>
+    <Layout>
+      <PostUpdateStyles>
+        <div className="container">
+          <DashboardHeading
+            title={t("updatePost")}
+            desc={`${t("updatePostId")} ${postId}`}
+          ></DashboardHeading>
+          <form onSubmit={handleSubmit(handleUpdatePost)}>
+            <div className="update-post">
+              <Field>
+                <Label htmlFor="title">{t("title")}</Label>
+                <Input
+                  control={control}
+                  placeholder={t("titlePlace")}
+                  name="title"
+                ></Input>
+              </Field>
+              <Field>
+                <Label htmlFor="slug">{t("slug")}</Label>
+                <Input
+                  control={control}
+                  placeholder={t("slugPlace")}
+                  name="slug"
+                ></Input>
+              </Field>
             </div>
-          </Field>
-          <Field>
-            <Label>{t("category")}</Label>
-            <DropDown>
-              <DropDown.Select
-                placeholder={`${
-                  selectCategory?.name || "Please select an option"
-                }`}
-              ></DropDown.Select>
-              <DropDown.List>
-                {category?.map((item) => (
-                  <DropDown.Options
-                    key={item.id}
-                    onClick={() => handleOnClick(item)}
-                  >
-                    {item.name}
-                  </DropDown.Options>
-                ))}
-              </DropDown.List>
-            </DropDown>
-          </Field>
+            <div className="update-post">
+              <Field>
+                <Label>{t("status")}</Label>
+                <div className="status">
+                  <Radio name="status" control={control} checked={true}>
+                    {renderStatus(Number(watchStatus))}
+                  </Radio>
+                </div>
+              </Field>
+              <Field>
+                <Label>{t("category")}</Label>
+                <DropDown>
+                  <DropDown.Select
+                    placeholder={`${
+                      selectCategory?.name || "Please select an option"
+                    }`}
+                  ></DropDown.Select>
+                  <DropDown.List>
+                    {category?.map((item) => (
+                      <DropDown.Options
+                        key={item.id}
+                        onClick={() => handleOnClick(item)}
+                      >
+                        {item.name}
+                      </DropDown.Options>
+                    ))}
+                  </DropDown.List>
+                </DropDown>
+              </Field>
+            </div>
+            <div className="update-post">
+              <Field>
+                <Label>{t("uploadImage")}</Label>
+                <ImageUpload
+                  name="image"
+                  post={true}
+                  className="image-select"
+                  image={image}
+                  handleDeleteImage={handleDeleteImage}
+                  progress={progress}
+                  onChange={handleSelectImage}
+                ></ImageUpload>
+              </Field>
+              <Field>
+                <Label>{t("feature")}</Label>
+                <Toggle
+                  on={watchHot === true}
+                  onClick={() => setValue("hot", !watchHot)}
+                ></Toggle>
+              </Field>
+            </div>
+            <div className="content entry-content">
+              <Label>{t("content")}</Label>
+              <div>
+                <ReactQuill
+                  modules={modules}
+                  theme="snow"
+                  value={content}
+                  onChange={setContent}
+                />
+              </div>
+            </div>
+            <Button
+              type="submit"
+              className="button-update"
+              isLoading={isSubmitting}
+              disabled={isSubmitting}
+            >
+              {t("updatePost")}
+            </Button>
+          </form>
         </div>
-        <div className="update-post">
-          <Field>
-            <Label>{t("uploadImage")}</Label>
-            <ImageUpload
-              name="image"
-              post={true}
-              className="image-select"
-              image={image}
-              handleDeleteImage={handleDeleteImage}
-              progress={progress}
-              onChange={handleSelectImage}
-            ></ImageUpload>
-          </Field>
-          <Field>
-            <Label>{t("feature")}</Label>
-            <Toggle
-              on={watchHot === true}
-              onClick={() => setValue("hot", !watchHot)}
-            ></Toggle>
-          </Field>
-        </div>
-        <div className="content entry-content">
-          <Label>{t("content")}</Label>
-          <div>
-            <ReactQuill
-              modules={modules}
-              theme="snow"
-              value={content}
-              onChange={setContent}
-            />
-          </div>
-        </div>
-        <Button
-          type="submit"
-          className="button-update"
-          isLoading={isSubmitting}
-          disabled={isSubmitting}
-        >
-          {t("updatePost")}
-        </Button>
-      </form>
-    </PostUpdateStyles>
+      </PostUpdateStyles>
+    </Layout>
   );
 };
 
-export default PostUpdate;
+export default UserUpdatePost;

@@ -16,6 +16,10 @@ import styled from "styled-components";
 import { Heading } from "../../components";
 import { v4 } from "uuid";
 import PostCategory from "../posts/PostCategory";
+import { setLogLevel } from "firebase/app";
+import { useTranslation } from "react-i18next";
+import useViewport from "../../hooks/useViewPort";
+import { Link } from "react-router-dom";
 
 const HomeNewestStyles = styled.div`
   .title {
@@ -89,6 +93,31 @@ const HomeNewestStyles = styled.div`
     gap: 20px;
     font-size: 16px;
   }
+  .pagination {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    list-style: none;
+    padding: 30px 0 20px 0;
+    gap: 10px;
+  }
+  .page-item {
+    padding: 7px 15px;
+    border-radius: 3px;
+    font-weight: 500;
+  }
+  .active {
+    background-color: ${(props) => props.theme.primary};
+    color: white;
+  }
+  .page-link {
+    padding: 10px;
+    width: 40px;
+    height: 40px;
+    background-color: ${(props) => props.theme.primary};
+    color: white;
+    border-radius: 3px;
+  }
   @media screen and (max-width: 1024px) {
     .title {
       margin-top: -20px;
@@ -116,6 +145,22 @@ const HomeNewestStyles = styled.div`
     }
     .title-more {
       margin-top: 30px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      color: ${(props) => props.theme.primary};
+      Link {
+        font-size: 16px;
+      }
+      .all-more {
+        display: flex;
+        align-items: center;
+        gap: 5px;
+      }
+      .icon {
+        width: 16px;
+        height: 16px;
+      }
     }
   }
   @media screen and (max-width: 700px) {
@@ -144,6 +189,9 @@ const HomeNewestStyles = styled.div`
 const HomeNewest = () => {
   const [posts, setPosts] = useState([]);
   const [category, setCategory] = useState([]);
+  const { t } = useTranslation();
+  const viewPort = useViewport();
+  const isMobile = viewPort.width <= 600;
   useEffect(() => {
     const colRef = collection(db, "posts");
     const queries = query(
@@ -181,16 +229,37 @@ const HomeNewest = () => {
   const [first, ...other] = posts;
   const newest = posts.slice(1, 4);
   const newestMore = posts.slice(4);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [nonClick, setNonClick] = useState(false);
+  const recordPerPage = 3;
+  const lastIndex = recordPerPage * currentPage;
+  const firstIndex = lastIndex - recordPerPage;
+  const record = newestMore.slice(firstIndex, lastIndex);
+  const npage = Math.ceil(newestMore.length / recordPerPage);
+  const numbers = [...Array(npage + 1).keys()].slice(1);
+  function prePage() {
+    if (currentPage !== 1) {
+      setCurrentPage(currentPage - 1);
+    }
+  }
+  function changePage(id) {
+    setCurrentPage(id);
+  }
+  function nextPage() {
+    if (currentPage !== numbers.length) {
+      setCurrentPage(currentPage + 1);
+    }
+  }
   if (posts?.length <= 0) return null;
   return (
     <HomeNewestStyles>
       <div className="container">
         <div className="title">
-          <Heading>Newest Update</Heading>
+          <Heading>{t("newest")}</Heading>
         </div>
         <div className="content-newest">
           <div className="newest-large">
-            <PostNewestLarge data={first}></PostNewestLarge>
+            <PostNewestLarge key={v4()} data={first}></PostNewestLarge>
           </div>
           <div className="newest-second">
             <div className="line-1"></div>
@@ -204,12 +273,33 @@ const HomeNewest = () => {
           </div>
         </div>
         <div className="title-more">
-          <Heading>More</Heading>
+          <Heading>{t("more")}</Heading>
+          {isMobile && (
+            <div className="all-more">
+              <Link to="/blog">{t("all")}</Link>
+              <Link to="/blog">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  strokeWidth="1.5"
+                  stroke="currentColor"
+                  className="icon"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M11.25 4.5l7.5 7.5-7.5 7.5m-6-15l7.5 7.5-7.5 7.5"
+                  />
+                </svg>
+              </Link>
+            </div>
+          )}
         </div>
         <div className="newest-more">
           <div className="post-item">
             {other.length > 0 &&
-              newestMore.map((item) => (
+              record.map((item) => (
                 <PostNewestItemsMore
                   key={v4()}
                   data={item}
@@ -217,14 +307,63 @@ const HomeNewest = () => {
               ))}
           </div>
           <div className="category">
-            <h2>Category</h2>
+            <h2>{t("category")}</h2>
             <div className="category-item">
               {category?.map((item) => (
-                <PostCategory key={v4()} children={item.name}></PostCategory>
+                <PostCategory
+                  key={v4()}
+                  children={item.name}
+                  to={item?.slug}
+                ></PostCategory>
               ))}
             </div>
           </div>
         </div>
+        <ul className="pagination">
+          <li>
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 24 24"
+              strokeWidth="2.5"
+              stroke="currentColor"
+              className="page-link"
+              onClick={prePage}
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M18.75 19.5l-7.5-7.5 7.5-7.5m-6 15L5.25 12l7.5-7.5"
+              />
+            </svg>
+          </li>
+          {numbers?.map((number, i) => (
+            <li
+              className={`page-item ${currentPage === number ? "active" : ""}`}
+            >
+              <a href="#" onClick={() => changePage(number)}>
+                {number}
+              </a>
+            </li>
+          ))}
+          <li>
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 24 24"
+              strokeWidth="2.5"
+              stroke="currentColor"
+              className="page-link"
+              onClick={nextPage}
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M11.25 4.5l7.5 7.5-7.5 7.5m-6-15l7.5 7.5-7.5 7.5"
+              />
+            </svg>
+          </li>
+        </ul>
       </div>
     </HomeNewestStyles>
   );

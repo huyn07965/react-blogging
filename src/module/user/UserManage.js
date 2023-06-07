@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import DashboardHeading from "../dashboard/DashboardHeading";
+import { useTranslation } from "react-i18next";
 import {
   ActionDelete,
   ActionEdit,
@@ -88,6 +89,7 @@ const UserManageStyles = styled.div`
 
 const UserManage = () => {
   const { userInfo } = useAuth();
+  const { t } = useTranslation();
   const [user, setUser] = useState();
   const [search, setSearch] = useState("");
   const [lastDoc, setLastDoc] = useState();
@@ -194,16 +196,16 @@ const UserManage = () => {
   if (userInfo?.role !== roleStatus.Admin) return null;
   return (
     <UserManageStyles>
-      <DashboardHeading title="User" desc="Manage your user">
+      <DashboardHeading title={t("user")} desc={t("manageUser")}>
         <div className="search-post">
           <input
             type="text"
             className="search"
-            placeholder="Search post..."
+            placeholder={`${t("searchUser")} ...`}
             onChange={handleSearch}
           />
           <Button to="/manage/add-user" className="header-button" height="52px">
-            Add New
+            {t("addNew")}
           </Button>
         </div>
       </DashboardHeading>
@@ -211,12 +213,12 @@ const UserManage = () => {
         <thead>
           <tr>
             <th>Id</th>
-            <th>Info</th>
-            <th>User Name</th>
-            <th>Email</th>
-            <th>Status</th>
-            <th>Role</th>
-            <th>Action</th>
+            <th>{t("info")}</th>
+            <th>{t("userName")}</th>
+            <th>{t("email")}</th>
+            <th>{t("status")}</th>
+            <th>{t("role")}</th>
+            <th>{t("action")}</th>
           </tr>
         </thead>
         <tbody>

@@ -8,12 +8,20 @@ import {
   PostRelated,
   PostTitle,
 } from "../module";
-import { collection, onSnapshot, query, where } from "firebase/firestore";
+import {
+  collection,
+  doc,
+  onSnapshot,
+  query,
+  updateDoc,
+  where,
+} from "firebase/firestore";
 import { db } from "../firebase-app/firebase-config";
 import NotFoundPage from "./NotFoundPage";
 import { useParams } from "react-router-dom";
 import slugify from "slugify";
 import Author from "../components/author/Author";
+import useGetCategory from "../hooks/useGetCategory";
 
 const DetailPageStyles = styled.div`
   .content-top {
@@ -86,7 +94,9 @@ const DetailPageStyles = styled.div`
 
 const DetailPage = () => {
   const { slug } = useParams();
-  const [postInfo, setPostInfo] = useState({});
+  const [postInfo, setPostInfo] = useState([]);
+  const { category } = useGetCategory(postInfo?.category?.id);
+  const [refresh, setRefresh] = useState(false);
   useEffect(() => {
     async function fetchData() {
       if (!slug) return;
@@ -103,6 +113,23 @@ const DetailPage = () => {
     }
     fetchData();
   }, [slug]);
+
+  useEffect(() => {
+    function loadFinished() {
+      setRefresh(true);
+    }
+    window.onload = loadFinished;
+    if (!refresh) {
+      async function setView() {
+        const colRef = doc(db, "posts", postInfo?.id);
+        await updateDoc(colRef, {
+          view: postInfo?.view + 1,
+        });
+      }
+      setView();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [postInfo?.id]);
   useEffect(() => {
     document.body.scrollIntoView({ behavior: "smooth", block: "start" });
   }, [slug]);
@@ -125,7 +152,7 @@ const DetailPage = () => {
                   to={postInfo.category?.slug}
                   className="content-newest-top"
                 >
-                  {postInfo?.category?.name}
+                  {category?.name}
                 </PostCategory>
                 <Postmeta
                   author={postInfo?.user?.userName}

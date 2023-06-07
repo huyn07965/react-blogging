@@ -26,6 +26,7 @@ import Swal from "sweetalert2";
 import { useNavigate } from "react-router-dom";
 import { debounce } from "lodash";
 import { useAuth } from "../../contexts/auth-context";
+import { useTranslation } from "react-i18next";
 
 const CategoryManageStyles = styled.div`
   .slug {
@@ -73,6 +74,7 @@ const CategoryManageStyles = styled.div`
 
 const CategoryManage = () => {
   const { userInfo } = useAuth();
+  const { t } = useTranslation();
   const [category, setCategory] = useState();
   const navigate = useNavigate();
   const [search, setSearch] = useState("");
@@ -155,12 +157,12 @@ const CategoryManage = () => {
   if (userInfo?.role !== roleStatus.Admin) return null;
   return (
     <CategoryManageStyles>
-      <DashboardHeading title="Category" desc="Manage your category">
+      <DashboardHeading title={t("category")} desc={t("manageCategory")}>
         <div className="search-post">
           <input
             type="text"
             className="search"
-            placeholder="Search post..."
+            placeholder={`${t("searchCategory")} ...`}
             onChange={handleSearch}
           />
           <Button
@@ -168,7 +170,7 @@ const CategoryManage = () => {
             className="header-button"
             height="52px"
           >
-            Add New
+            {t("addNew")}
           </Button>
         </div>
       </DashboardHeading>
@@ -176,10 +178,10 @@ const CategoryManage = () => {
         <thead>
           <tr>
             <th>Id</th>
-            <th>Name</th>
-            <th>Slug</th>
-            <th>Status</th>
-            <th>Actions</th>
+            <th>{t("name")}</th>
+            <th>{t("slug")}</th>
+            <th>{t("status")}</th>
+            <th>{t("action")}</th>
           </tr>
         </thead>
         <tbody>

@@ -5,6 +5,7 @@ import styled from "styled-components";
 import { auth } from "../../firebase-app/firebase-config";
 import { useAuth } from "../../contexts/auth-context";
 import { roleStatus } from "../../utils/constants";
+import { useTranslation } from "react-i18next";
 
 const SidebarStyles = styled.div`
   width: 300px;
@@ -63,7 +64,7 @@ const SidebarStyles = styled.div`
 `;
 const sidebarLinks = [
   {
-    title: "Dashboard",
+    title: "dashboard",
     url: "/dashboard",
     icon: (
       <svg
@@ -83,7 +84,7 @@ const sidebarLinks = [
     ),
   },
   {
-    title: "Post",
+    title: "post",
     url: "/manage/post",
     icon: (
       <svg
@@ -103,7 +104,7 @@ const sidebarLinks = [
     ),
   },
   {
-    title: "Category",
+    title: "category",
     url: "/manage/category",
     icon: (
       <svg
@@ -123,7 +124,7 @@ const sidebarLinks = [
     ),
   },
   {
-    title: "User",
+    title: "user",
     url: "/manage/user",
     icon: (
       <svg
@@ -143,7 +144,7 @@ const sidebarLinks = [
     ),
   },
   {
-    title: "Contact",
+    title: "about",
     url: "/manage/update-contact",
     icon: (
       <svg
@@ -163,7 +164,7 @@ const sidebarLinks = [
     ),
   },
   {
-    title: "Logout",
+    title: "signOut",
     url: "/",
     icon: (
       <svg
@@ -187,6 +188,7 @@ const sidebarLinks = [
 const SideBar = () => {
   const { userInfo } = useAuth();
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const handleSignOut = () => {
     signOut(auth);
     navigate("/");
@@ -199,13 +201,13 @@ const SideBar = () => {
           return (
             <div className="menu-item" onClick={handleSignOut} key={link.title}>
               <span className="menu-icon">{link.icon}</span>
-              <span className="menu-text">{link.title}</span>
+              <span className="menu-text">{t(`${link.title}`)}</span>
             </div>
           );
         return (
           <NavLink to={link.url} className="menu-item" key={link.title}>
             <span className="menu-icon">{link.icon}</span>
-            <span className="menu-text">{link.title}</span>
+            <span className="menu-text">{t(`${link.title}`)}</span>
           </NavLink>
         );
       })}

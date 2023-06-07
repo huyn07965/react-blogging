@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import styled from "styled-components";
 import PostCategory from "./PostCategory";
 import PostImage from "./PostImage";
@@ -6,6 +6,12 @@ import Postmeta from "./Postmeta";
 import PostTitle from "./PostTitle";
 import slugify from "slugify";
 import useViewport from "../../hooks/useViewPort";
+import { useAuth } from "../../contexts/auth-context";
+import { useNavigate } from "react-router-dom";
+import useSavePost from "../../hooks/useSavePost";
+import SavePost from "../../components/savepost/SavePost";
+import useGetCategory from "../../hooks/useGetCategory";
+import useGetUserPost from "../../hooks/useGetUserPost";
 
 const PostNewestItemsStyles = styled.div`
   .item {
@@ -23,7 +29,10 @@ const PostNewestItemsStyles = styled.div`
     flex: 1;
   }
   .content-newest-top {
-    display: inline-block;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
     font-size: 14px;
     font-weight: 500;
     margin: 0px 0 10px 0;
@@ -53,6 +62,11 @@ const PostNewestItemsStyles = styled.div`
 `;
 
 const PostNewestItems = ({ data }) => {
+  const { userInfo } = useAuth();
+  const navigate = useNavigate();
+  const { category } = useGetCategory(data?.category?.id);
+  const { user } = useGetUserPost(data?.user?.id);
+  const { handleWatchLater, savePost } = useSavePost(data.id);
   const viewPort = useViewport();
   const isMobile = viewPort.width <= 400;
   if (!data.id) return null;
@@ -66,13 +80,16 @@ const PostNewestItems = ({ data }) => {
           to={data?.slug}
         ></PostImage>
         <div className="content">
-          <PostCategory
-            type="secondary"
-            className="content-newest-top"
-            to={data.category?.slug}
-          >
-            {data.category?.name}
-          </PostCategory>
+          <div className="content-newest-top">
+            <PostCategory type="secondary" to={data.category?.slug}>
+              {category?.name}
+            </PostCategory>
+            <SavePost
+              onClick={userInfo ? handleWatchLater : () => navigate("/sign-in")}
+              savePost={savePost}
+              data={data.id}
+            ></SavePost>
+          </div>
           {!isMobile ? (
             <PostTitle
               className="content-newest-center"
@@ -92,7 +109,7 @@ const PostNewestItems = ({ data }) => {
           )}
 
           <Postmeta
-            author={data.user?.userName}
+            author={user?.userName}
             date={data.createdAt?.seconds}
             className="content-info"
             to={slugify(data.user?.fullName || "", { lower: true })}

@@ -12,6 +12,7 @@ import { useAuth } from "../../contexts/auth-context";
 import { useEffect } from "react";
 import * as yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
+import { useTranslation } from "react-i18next";
 
 const CategoryAddNewStyles = styled.div`
   .category-layout {
@@ -42,6 +43,7 @@ const schema = yup.object({
 });
 const CategoryAddNew = () => {
   const { userInfo } = useAuth();
+  const { t } = useTranslation();
   const {
     control,
     watch,
@@ -71,9 +73,9 @@ const CategoryAddNew = () => {
         ...newValues,
         createdAt: serverTimestamp(),
       });
-      toast.success("Add new category successfully!");
+      toast.success(`${t("toastCreateCategory")}`);
     } catch (erorr) {
-      toast.success("Add new category fail!");
+      toast.success(`${t("toastCreateCategory")}`);
     } finally {
       reset({
         name: "",
@@ -98,31 +100,31 @@ const CategoryAddNew = () => {
   return (
     <CategoryAddNewStyles>
       <DashboardHeading
-        title="New Category"
-        desc="Add New Category"
+        title={t("newCategory")}
+        desc={t("addNewCategory")}
       ></DashboardHeading>
       <form onSubmit={handleSubmit(addCategory)}>
         <div className="category-layout">
           <Field>
-            <Label htmlFor="name">Name</Label>
+            <Label htmlFor="name">{t("name")}</Label>
             <Input
               control={control}
               name="name"
-              placeholder="Enter your category name"
+              placeholder={t("categoryPlace")}
             ></Input>
           </Field>
           <Field>
-            <Label htmlFor="slug">Slug</Label>
+            <Label htmlFor="slug">{t("slug")}</Label>
             <Input
               control={control}
               name="slug"
-              placeholder="Enter your slug"
+              placeholder={t("slugPlace")}
             ></Input>
           </Field>
         </div>
         <div className="category-layout">
           <Field>
-            <Label>Status</Label>
+            <Label>{t("status")}</Label>
             <div className="radio-category">
               <Radio
                 name="status"
@@ -150,7 +152,7 @@ const CategoryAddNew = () => {
           isLoading={isSubmitting}
           disabled={isSubmitting}
         >
-          Add New Category
+          {t("addNewCategory")}
         </Button>
       </form>
     </CategoryAddNewStyles>

@@ -12,6 +12,7 @@ import {
   SignInPage,
   SignUpPage,
   UserPage,
+  WatchLater,
 } from "./pages";
 import {
   CategoryAddNew,
@@ -23,11 +24,15 @@ import {
   PostManage,
   PostUpdate,
   UserAddNew,
+  UserCreatePost,
   UserEdit,
   UserInfo,
   UserManage,
+  UserPost,
+  UserUpdatePost,
   UserUpdate,
 } from "./module";
+import Translate from "./components/translate/Translate";
 
 function App() {
   return (
@@ -38,10 +43,24 @@ function App() {
           <Route path="/sign-up" element={<SignUpPage></SignUpPage>}></Route>
           <Route path="/sign-in" element={<SignInPage></SignInPage>}></Route>
           <Route path="/userInfo" element={<UserInfo></UserInfo>}></Route>
+          <Route
+            path="/create-post"
+            element={<UserCreatePost></UserCreatePost>}
+          ></Route>
+          <Route path="/user-post" element={<UserPost></UserPost>}></Route>
+          <Route
+            path="/user/update-post"
+            element={<UserUpdatePost></UserUpdatePost>}
+          ></Route>
           <Route path="/edit-user" element={<UserEdit></UserEdit>}></Route>
           <Route path="/blog" element={<BlogPage></BlogPage>}></Route>
           <Route path="/search" element={<SearchPage></SearchPage>}></Route>
           <Route path="/contact" element={<ContactPage></ContactPage>}></Route>
+          <Route path="/translate" element={<Translate></Translate>}></Route>
+          <Route
+            path="/watch-later"
+            element={<WatchLater></WatchLater>}
+          ></Route>
           <Route path="/post/:slug" element={<DetailPage></DetailPage>}></Route>
           <Route
             path="/category/:slug"

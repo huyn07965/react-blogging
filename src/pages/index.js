@@ -9,6 +9,7 @@ import SearchPage from "./SearchPage";
 import SignInPage from "./SignInPage";
 import SignUpPage from "./SignUpPage";
 import UserPage from "./UserPage";
+import WatchLater from "./WatchLater";
 
 export {
   DashBoardPage,
@@ -22,4 +23,5 @@ export {
   ContactPage,
   BlogPage,
   SearchPage,
+  WatchLater,
 };

@@ -23,10 +23,13 @@ import PostRelated from "./posts/PostRelated";
 import PostTitle from "./posts/PostTitle";
 import PostUpdate from "./posts/PostUpdate";
 import UserAddNew from "./user/UserAddNew";
+import UserCreatePost from "./user/UserCreatePost";
 import UserEdit from "./user/UserEdit";
 import UserInfo from "./user/UserInfo";
 import UserManage from "./user/UserManage";
+import UserPost from "./user/UserPost";
 import UserUpdate from "./user/UserUpdate";
+import UserUpdatePost from "./user/UserUpdatePost";
 export {
   DashboardHeading,
   DashBoardLayout,
@@ -57,4 +60,7 @@ export {
   UserInfo,
   ContactUpdate,
   UserEdit,
+  UserCreatePost,
+  UserPost,
+  UserUpdatePost,
 };

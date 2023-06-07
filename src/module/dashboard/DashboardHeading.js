@@ -13,8 +13,6 @@ const DashboardHeadingStyles = styled.div`
   }
 `;
 const DashboardHeading = ({ title = "", desc = "", children }) => {
-  const { userInfo } = useAuth();
-  if (userInfo?.role !== roleStatus.Admin) return null;
   return (
     <DashboardHeadingStyles>
       <div>

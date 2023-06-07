@@ -14,6 +14,7 @@ import { useForm } from "react-hook-form";
 import { useEffect } from "react";
 import { useAuth } from "../../contexts/auth-context";
 import { roleStatus } from "../../utils/constants";
+import { useTranslation } from "react-i18next";
 Quill.register("modules/imageUploader", ImageUploader);
 
 const ContactUpdateStyles = styled.div`
@@ -31,6 +32,7 @@ const ContactUpdateStyles = styled.div`
 `;
 const ContactUpdate = () => {
   const { userInfo } = useAuth();
+  const { t } = useTranslation();
   const {
     handleSubmit,
     reset,
@@ -52,7 +54,7 @@ const ContactUpdate = () => {
     await updateDoc(colRef, {
       content,
     });
-    toast.success("Update category successfully!");
+    toast.success(`${t("toastUpdateAbout")}`);
   };
   const modules = useMemo(
     () => ({
@@ -92,7 +94,7 @@ const ContactUpdate = () => {
     <ContactUpdateStyles>
       <form onSubmit={handleSubmit(handleUpdateContact)}>
         <div className="content entry-content">
-          <Label>Content</Label>
+          <Label>{t("about")}</Label>
           <div>
             <ReactQuill
               modules={modules}
@@ -108,7 +110,7 @@ const ContactUpdate = () => {
           isLoading={isSubmitting}
           disabled={isSubmitting}
         >
-          Update Contact
+          {t("updateAbout")}
         </Button>
       </form>
     </ContactUpdateStyles>

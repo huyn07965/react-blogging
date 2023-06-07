@@ -6,7 +6,11 @@ import { useEffect } from "react";
 import { collection, onSnapshot, query } from "firebase/firestore";
 import { db } from "../firebase-app/firebase-config";
 
-const BlogPageStyles = styled.div``;
+const BlogPageStyles = styled.div`
+  @media screen and (max-width: 600px) {
+    margin-top: -40px;
+  }
+`;
 const BlogPage = () => {
   const [post, setPost] = useState({});
   useEffect(() => {
@@ -25,6 +29,9 @@ const BlogPage = () => {
       });
     }
     fetchData();
+  }, []);
+  useEffect(() => {
+    document.body.scrollIntoView({ behavior: "smooth", block: "start" });
   }, []);
   useEffect(() => {
     document.title = "Blog Page";

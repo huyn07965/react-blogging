@@ -16,6 +16,7 @@ import {
   Label,
 } from "../components";
 import slugify from "slugify";
+import { useTranslation } from "react-i18next";
 
 const SignUpStyles = styled.div`
   min-height: 100vh;
@@ -83,6 +84,7 @@ const schema = yup.object({
 });
 const SignUpPage = () => {
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const {
     control,
     handleSubmit,
@@ -92,7 +94,7 @@ const SignUpPage = () => {
     if (!isValid) return;
     await createUserWithEmailAndPassword(auth, values.email, values.password);
     // await updateProfile(auth.currentUser, { userName: values.userName });
-    toast.success("Register user sucessfully!!");
+    toast.success(`${t("signUpSuccess")}`);
     await setDoc(doc(db, "users", auth.currentUser.uid), {
       fullName: values.fullName,
       email: values.email,
@@ -107,6 +109,7 @@ const SignUpPage = () => {
       status: 1,
       avatar: "/user.jpg",
       createdAt: serverTimestamp(),
+      watchLater: [],
     });
     navigate("/");
   };
@@ -135,18 +138,18 @@ const SignUpPage = () => {
         >
           <div className="content">
             <Field>
-              <Label htmlFor="fullName">Full Name</Label>
+              <Label htmlFor="fullName">{t("fullName")}</Label>
               <Input
-                placeholder="Enter your Name"
+                placeholder={t("fullNamePlace")}
                 type="text"
                 name="fullName"
                 control={control}
               />
             </Field>
             <Field>
-              <Label htmlFor="userName">User Name</Label>
+              <Label htmlFor="userName">{t("userName")}</Label>
               <Input
-                placeholder="Enter user Name"
+                placeholder={t("userNamePlace")}
                 type="text"
                 name="userName"
                 control={control}
@@ -155,21 +158,22 @@ const SignUpPage = () => {
           </div>
           <div className="content">
             <Field>
-              <Label htmlFor="email">Email Address</Label>
+              <Label htmlFor="email">{t("email")}</Label>
               <Input
-                placeholder="Enter your Email"
+                placeholder={t("emailPlace")}
                 type="email"
                 name="email"
                 control={control}
               />
             </Field>
             <Field>
-              <Label htmlFor="password">Password</Label>
+              <Label htmlFor="password">{t("pass")}</Label>
               <InputPasswordToogle control={control}></InputPasswordToogle>
             </Field>
           </div>
           <div className="have-account">
-            You already have an account? <NavLink to="/sign-in">Login</NavLink>
+            {t("titleAlreadyAccount")}{" "}
+            <NavLink to="/sign-in">{t("titleLogin")}</NavLink>
           </div>
           <Button
             type="submit"
@@ -177,7 +181,7 @@ const SignUpPage = () => {
             disabled={isSubmitting}
             style={{ maxWidth: 300, margin: "0 auto" }}
           >
-            Sign Up
+            {t("signUp")}
           </Button>
         </form>
       </div>

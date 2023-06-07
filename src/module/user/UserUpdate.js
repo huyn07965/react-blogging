@@ -21,6 +21,7 @@ import useHandleImage from "../../hooks/useHandleImage";
 import { useAuth } from "../../contexts/auth-context";
 import * as yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
+import { useTranslation } from "react-i18next";
 
 const UserUpdateStyles = styled.div`
   .user-layout {
@@ -78,6 +79,7 @@ const schema = yup.object({
 });
 const UserUpdate = () => {
   const { userInfo } = useAuth();
+  const { t } = useTranslation();
   const {
     control,
     handleSubmit,
@@ -107,7 +109,7 @@ const UserUpdate = () => {
       status: Number(values.status),
       avatar: image,
     });
-    toast.success("Update user successfully!");
+    toast.success(`${t("toastUpdateUser")}`);
     navigate("/manage/user");
   };
   async function deleteAvatar() {
@@ -143,7 +145,10 @@ const UserUpdate = () => {
   if (userInfo?.role !== roleStatus.Admin) return null;
   return (
     <UserUpdateStyles>
-      <DashboardHeading title="User" desc="Update user"></DashboardHeading>
+      <DashboardHeading
+        title={t("updateUser")}
+        desc={`${t("updateUserId")} ${userId}`}
+      ></DashboardHeading>
       <form onSubmit={handleSubmit(handleUpdateUser)}>
         <div className="user-avatar">
           <ImageUpload
@@ -158,40 +163,40 @@ const UserUpdate = () => {
         </div>
         <div className="user-layout">
           <Field>
-            <Label>Email</Label>
+            <Label>{t("email")}</Label>
             <Input
               control={control}
               name="email"
-              placeholder="Enter your email"
+              placeholder={t("emailPlace")}
               disabled={true}
             ></Input>
           </Field>
           <Field>
-            <Label htmlFor="fullName">Full Name</Label>
+            <Label htmlFor="fullName">{t("fullName")}</Label>
             <Input
               control={control}
               name="fullName"
-              placeholder="Enter your full name"
+              placeholder={t("fullNamePlace")}
             ></Input>
           </Field>
         </div>
         <div className="user-layout">
           <Field>
-            <Label htmlFor="userName">User Name</Label>
+            <Label htmlFor="userName">{t("userName")}</Label>
             <Input
               name="userName"
               control={control}
-              placeholder="Enter your user name"
+              placeholder={t("userNamePlace")}
             ></Input>
           </Field>
           <Field>
-            <Label htmlFor="password">Password</Label>
+            <Label htmlFor="password">{t("pass")}</Label>
             <InputPasswordToogle control={control}></InputPasswordToogle>
           </Field>
         </div>
         <div className="user-layout">
           <Field>
-            <Label>Status</Label>
+            <Label>{t("status")}</Label>
             <div className="radio-user">
               <Radio
                 name="status"
@@ -220,7 +225,7 @@ const UserUpdate = () => {
             </div>
           </Field>
           <Field>
-            <Label>Role</Label>
+            <Label>{t("role")}</Label>
             <div className="radio-user">
               <Radio
                 name="role"
@@ -251,15 +256,15 @@ const UserUpdate = () => {
         </div>
         <div className="user-layout">
           <Field>
-            <Label htmlFor="slug">Slug</Label>
+            <Label htmlFor="slug">{t("slug")}</Label>
             <Input
               name="slug"
               control={control}
-              placeholder="Enter your new slug"
+              placeholder={t("slugPlace")}
             ></Input>
           </Field>
           <Field>
-            <Label htmlFor="description">Description</Label>
+            <Label htmlFor="description">{t("description")}</Label>
             <Textarea name="description" control={control}></Textarea>
           </Field>
         </div>
@@ -270,7 +275,7 @@ const UserUpdate = () => {
           isLoading={isSubmitting}
           disabled={isSubmitting}
         >
-          Update User
+          {t("updateUser")}
         </Button>
       </form>
     </UserUpdateStyles>

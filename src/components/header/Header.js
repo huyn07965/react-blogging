@@ -7,21 +7,9 @@ import { useState } from "react";
 import { debounce } from "lodash";
 import { toast } from "react-toastify";
 import slugify from "slugify";
+import { useTranslation } from "react-i18next";
+import Translate from "../translate/Translate";
 
-const menuList = [
-  {
-    url: "/",
-    title: "Home",
-  },
-  {
-    url: "/blog",
-    title: "Blog",
-  },
-  {
-    url: "/contact",
-    title: "Contact",
-  },
-];
 const HeaderStyles = styled.header`
   position: fixed;
   top: 0;
@@ -110,10 +98,10 @@ const HeaderStyles = styled.header`
       color: #c4c4c4;
     }
   }
-  .search-icon {
-    width: 40px;
-    height: 40px;
-    /* background-color: ${(props) => props.theme.primary}; */
+  .background-icon {
+    position: relative;
+    width: 35px;
+    height: 35px;
     border-radius: 5px;
     display: flex;
     align-items: center;
@@ -131,8 +119,8 @@ const HeaderStyles = styled.header`
     right: 15px;
   }
   .icon {
-    width: 25px;
-    height: 25px;
+    width: 20px;
+    height: 20px;
     color: white;
   }
   .show-icon {
@@ -145,18 +133,29 @@ const HeaderStyles = styled.header`
     left: 15px;
     width: 20px;
     height: 20px;
-    color: black;
+    color: ${(props) => props.theme.primary};
+  }
+  .notification {
+    position: absolute;
+    top: 0;
+    right: -5px;
+    color: white;
+    background-color: red;
+    font-size: 10px;
+    padding: 2px 6px;
+    border-radius: 10px;
   }
   .avatar {
-    min-width: 55px;
-    max-width: 55px;
-    height: 55px;
+    min-width: 50px;
+    max-width: 50px;
+    height: 50px;
     border-radius: 100%;
   }
   .image {
     width: 100%;
     height: 100%;
     border-radius: inherit;
+    object-fit: cover;
   }
   .header-right {
     display: flex;
@@ -184,13 +183,14 @@ const HeaderStyles = styled.header`
       align-items: flex-start;
     }
     .menu {
-      gap: 20px;
+      /* gap: 20px;
       margin-left: 0;
       &-item {
         padding: 0;
-      }
+      } */
+      display: none;
     }
-    .search-icon {
+    .background-icon {
       height: 35px;
     }
     .avatar {
@@ -217,23 +217,41 @@ const HeaderStyles = styled.header`
 // }
 const Header = () => {
   const { userInfo } = useAuth();
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const [showSearch, setShowSearch] = useState(false);
   const [search, setSearch] = useState("");
+  const [notification, setNotification] = useState(false);
+  // function runScript(event) {
+  //   if (event.which == 13 || event.keyCode == 13) {
+  //     //code to execute here
+  //     nextSearch();
+  //   }
+  // }
   const handleSearch = debounce((e) => {
     setSearch(
       slugify(e?.target.value, {
         lower: true,
         replacement: " ",
         trim: true,
-      })
+      }),
+      500
     );
+    const node = document.querySelector(".search");
+    node?.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") {
+        if (search?.length > 0) {
+          navigate(`/search?title=${search}`);
+        }
+      }
+    });
   }, 500);
+
   const nextSearch = () => {
     if (search?.length > 0) {
       navigate(`/search?title=${search}`);
     } else {
-      toast.error("Please enter the keyword to find");
+      toast.error(`${t("notificationFind")}`);
     }
   };
   return (
@@ -259,7 +277,7 @@ const Header = () => {
             <input
               type="text"
               name="search"
-              placeholder="Enter Keyword"
+              placeholder={t("enterKey")}
               onChange={handleSearch}
               className="search"
             />
@@ -288,18 +306,46 @@ const Header = () => {
                 <img src="/blogging.png" alt="blogging" className="blogging" />
               </NavLink>
               <ul className="menu">
-                {menuList.map((item) => (
-                  <li key={item.title}>
-                    <NavLink className="menu-item" to={item.url}>
-                      {item.title}
-                    </NavLink>
-                  </li>
-                ))}
+                <li>
+                  <NavLink className="menu-item" to="/">
+                    {t("home")}
+                  </NavLink>
+                </li>
+                <li>
+                  <NavLink className="menu-item" to="/blog">
+                    {t("blog")}
+                  </NavLink>
+                </li>
+                <li>
+                  <NavLink className="menu-item" to="/contact">
+                    {t("about")}
+                  </NavLink>
+                </li>
               </ul>
             </div>
 
             <div className="header-right">
-              <div className="search-icon">
+              {/* <div className="background-icon">
+                {!notification && <div className="notification">12</div>}
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  strokeWidth="2"
+                  stroke="currentColor"
+                  className="icon"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M14.857 17.082a23.848 23.848 0 005.454-1.31A8.967 8.967 0 0118 9.75v-.7V9A6 6 0 006 9v.75a8.967 8.967 0 01-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 01-5.714 0m5.714 0a3 3 0 11-5.714 0"
+                  />
+                </svg>
+              </div> */}
+              <div>
+                <Translate></Translate>
+              </div>
+              <div className="background-icon">
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
                   fill="none"
@@ -316,6 +362,7 @@ const Header = () => {
                   />
                 </svg>
               </div>
+
               {!userInfo ? (
                 <Button
                   height="55px"

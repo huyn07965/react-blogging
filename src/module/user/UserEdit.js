@@ -18,6 +18,7 @@ import { db } from "../../firebase-app/firebase-config";
 import { doc, getDoc, updateDoc } from "firebase/firestore";
 import { toast } from "react-toastify";
 import useHandleImage from "../../hooks/useHandleImage";
+import { useTranslation } from "react-i18next";
 
 const UserUpdateStyles = styled.div`
   .user-layout {
@@ -37,6 +38,7 @@ const UserUpdateStyles = styled.div`
   }
   .image-avatar {
     width: 200px;
+    object-fit: cover;
   }
   .user-layout {
     display: grid;
@@ -71,6 +73,7 @@ const UserEdit = () => {
     setValue,
     formState: { isSubmitting },
   } = useForm();
+  const { t } = useTranslation();
   const [params] = useSearchParams();
   const userId = params.get("id");
   const navigate = useNavigate();
@@ -85,7 +88,7 @@ const UserEdit = () => {
       ...values,
       avatar: image,
     });
-    toast.success("Update user successfully!");
+    toast.success(`${t("toastUpdateUser")}`);
     navigate("/userInfo");
   };
   async function deleteAvatar() {
@@ -114,8 +117,8 @@ const UserEdit = () => {
       <Layout>
         <div className="container">
           <DashboardHeading
-            title="Account"
-            desc="Edit Account"
+            title={t("userAccount")}
+            desc={t("editAccount")}
           ></DashboardHeading>
           <form onSubmit={handleSubmit(handleUpdateUser)}>
             <div className="user-avatar">
@@ -131,39 +134,39 @@ const UserEdit = () => {
             </div>
             <div className="user-layout">
               <Field>
-                <Label>Email</Label>
+                <Label>{t("email")}</Label>
                 <Input
                   control={control}
                   name="email"
-                  placeholder="Enter your email"
+                  placeholder={t("emailPlace")}
                 ></Input>
               </Field>
               <Field>
-                <Label>Full Name</Label>
+                <Label>{t("fullName")}</Label>
                 <Input
                   control={control}
                   name="fullName"
-                  placeholder="Enter your full name"
+                  placeholder={t("fullNamePlace")}
                 ></Input>
               </Field>
             </div>
             <div className="user-layout">
               <Field>
-                <Label>User Name</Label>
+                <Label>{t("userName")}</Label>
                 <Input
                   name="userName"
                   control={control}
-                  placeholder="Enter your user name"
+                  placeholder={t("userNamePlace")}
                 ></Input>
               </Field>
               <Field>
-                <Label>Password</Label>
+                <Label>{t("pass")}</Label>
                 <InputPasswordToogle control={control}></InputPasswordToogle>
               </Field>
             </div>
             <div className="user-layout">
               <Field>
-                <Label>Description</Label>
+                <Label>{t("description")}</Label>
                 <Textarea name="description" control={control}></Textarea>
               </Field>
             </div>
@@ -174,7 +177,7 @@ const UserEdit = () => {
               isLoading={isSubmitting}
               disabled={isSubmitting}
             >
-              Update User
+              {t("updateUser")}
             </Button>
           </form>
         </div>

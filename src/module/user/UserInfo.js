@@ -11,6 +11,7 @@ import { useAuth } from "../../contexts/auth-context";
 import { signOut } from "firebase/auth";
 import NotFoundPage from "../../pages/NotFoundPage";
 import { toast } from "react-toastify";
+import { useTranslation } from "react-i18next";
 
 const UserInfoStyles = styled.div`
   .header-user {
@@ -31,12 +32,12 @@ const UserInfoStyles = styled.div`
     max-width: 150px;
     height: 45px;
   }
-  .infomation {
+  .information {
     display: flex;
     justify-content: space-between;
     width: 100%;
   }
-  .infomation-left {
+  .information-left {
     max-width: 30%;
   }
   .avatar {
@@ -58,7 +59,7 @@ const UserInfoStyles = styled.div`
     border-radius: inherit;
     object-fit: cover;
   }
-  .infomation-user {
+  .information-user {
     display: flex;
     flex-direction: column;
     align-items: flex-start;
@@ -84,7 +85,7 @@ const UserInfoStyles = styled.div`
     font-weight: 500;
     color: ${(props) => props.theme.greyDark};
   }
-  .name-funtion {
+  .name-function {
     font-size: 20px;
     font-weight: 500;
     color: ${(props) => props.theme.greyDark};
@@ -95,10 +96,10 @@ const UserInfoStyles = styled.div`
       color: ${(props) => props.theme.primary};
     }
   }
-  .infomation-right {
+  .information-right {
     margin-left: 80px;
   }
-  .infomation-right-bottom {
+  .information-right-bottom {
     margin-top: 30px;
   }
   .title-user {
@@ -111,7 +112,7 @@ const UserInfoStyles = styled.div`
     font-weight: 400;
     color: ${(props) => props.theme.greyDark};
   }
-  .infomaton-detail {
+  .information-detail {
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -143,12 +144,12 @@ const UserInfoStyles = styled.div`
       max-width: 110px;
       height: 40px;
     }
-    .infomation {
+    .information {
       flex-wrap: wrap;
       width: 100%;
       row-gap: 30px;
     }
-    .infomation-left {
+    .information-left {
       min-width: 100%;
     }
     .avatar {
@@ -167,11 +168,11 @@ const UserInfoStyles = styled.div`
       margin-top: 10px;
       width: 100%;
     }
-    .name-funtion {
+    .name-function {
       font-size: 16px;
       width: 40%;
     }
-    .infomation-right {
+    .information-right {
       margin: auto;
     }
   }
@@ -179,30 +180,22 @@ const UserInfoStyles = styled.div`
 
 const UserInfo = () => {
   const { userInfo } = useAuth();
+  const { t } = useTranslation();
   const [params] = useSearchParams();
-  const [user, setUser] = useState({});
   const [userAuth, setUserAuth] = useState(false);
   const userId = params.get("id");
   const navigate = useNavigate();
   const handleSignOut = () => {
     signOut(auth);
     navigate("/");
-    toast.success("Sign Out Successfull!");
+    toast.success(`${t("signOutSuccess")}`);
   };
   useEffect(() => {
     if (userInfo?.role == roleStatus.Admin) {
       setUserAuth(true);
     }
   }, [userInfo]);
-  useEffect(() => {
-    async function fetchData() {
-      const docRef = doc(db, "users", userId);
-      const singleDoc = await getDoc(docRef);
-      setUser(singleDoc.data());
-    }
-    fetchData();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+
   const renderStatus = (status) => {
     switch (status) {
       case 1:
@@ -228,7 +221,7 @@ const UserInfo = () => {
     }
   };
   useEffect(() => {
-    document.title = "User Infomation Page";
+    document.title = "User information Page";
   });
   if (!userInfo) return <NotFoundPage></NotFoundPage>;
   return (
@@ -236,95 +229,114 @@ const UserInfo = () => {
       <Layout>
         <div className="container">
           <div className="header-user">
-            <h2 className="Account">User Account</h2>
+            <h2 className="Account">{t("userAccount")}</h2>
             {userAuth && (
               <Button
                 onClick={() => navigate("/dashboard")}
                 className="sign-out"
               >
-                Manage
+                {t("manage")}
               </Button>
             )}
           </div>
-          <div className="infomation">
-            <div className="infomation-left">
+          <div className="information">
+            <div className="information-left">
               <div className="avatar">
                 <div className="avatar-user">
-                  <img className="image" src={user?.avatar} alt="avatar" />
+                  <img className="image" src={userInfo?.avatar} alt="avatar" />
                 </div>
-                <div className="infomation-user">
-                  <h3 className="displayName">{user?.userName}</h3>
-                  <h4 className="email">{user?.email}</h4>
+                <div className="information-user">
+                  <h3 className="displayName">{userInfo?.userName}</h3>
+                  <h4 className="email">{userInfo?.email}</h4>
                 </div>
               </div>
               <div className="function">
-                <Link className="name-funtion active">
-                  Persional Infomation
-                </Link>
                 {userInfo?.role == roleStatus.Admin ? (
                   <h3
                     onClick={() => navigate(`/manage/update-user?id=${userId}`)}
-                    className="name-funtion"
+                    className="name-function active"
                   >
-                    Edit Account
+                    {t("editAccount")}
                   </h3>
                 ) : (
                   <h3
-                    className="name-funtion"
+                    className="name-function active"
                     onClick={() => navigate(`/edit-user?id=${userId}`)}
                   >
-                    Edit Account
+                    {t("editAccount")}
                   </h3>
                 )}
-
-                <Link className="name-funtion">Create Post</Link>
-                {userInfo?.email === user?.email && (
-                  <p onClick={handleSignOut} className="name-funtion">
-                    Sign out
+                <h3
+                  className="name-function"
+                  onClick={() => navigate(`/watch-later`)}
+                >
+                  {t("watchLater")}
+                </h3>
+                {userInfo?.role == roleStatus.Admin ? (
+                  <Link className="name-function" to="/manage/add-post">
+                    {t("createPost")}
+                  </Link>
+                ) : (
+                  <Link to="/create-post" className="name-function">
+                    {t("createPost")}
+                  </Link>
+                )}
+                {userInfo?.role == roleStatus.Admin ? (
+                  <Link className="name-function" to="/manage/user">
+                    {t("myPost")}
+                  </Link>
+                ) : (
+                  <Link to="/user-post" className="name-function">
+                    {t("myPost")}
+                  </Link>
+                )}
+                {userInfo?.email && (
+                  <p onClick={handleSignOut} className="name-function">
+                    {t("signOut")}
                   </p>
                 )}
               </div>
             </div>
-            <div className="infomation-right">
-              <div className="infomation-right-top">
-                <h2 className="title-user">Persional Infomation</h2>
+            <div className="information-right">
+              <div className="information-right-top">
+                <h2 className="title-user">{t("personalInfo")}</h2>
                 <h4 className="description">
                   Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed
                   do eiusmod tempor incididunt ut labore et dolore magna aliqua.
                 </h4>
               </div>
-              <div className="infomation-right-bottom">
-                <div className="infomaton-detail">
+              <div className="information-right-bottom">
+                <div className="information-detail">
                   <div className="box">
-                    <h3 className="title-content">Name</h3>
-                    <h4 className="content">{user?.fullName}</h4>
+                    <h3 className="title-content">{t("fullName")}</h3>
+                    <h4 className="content">{userInfo?.fullName}</h4>
                   </div>
                   <div className="box">
-                    <h3 className="title-content">Created At</h3>
+                    <h3 className="title-content">{t("createAt")}</h3>
                     <h4 className="content">
                       {new Date(
-                        user?.createdAt?.seconds * 1000
+                        userInfo?.createdAt?.seconds * 1000
                       ).toLocaleDateString("vi-VI")}
                     </h4>
                   </div>
                 </div>
-                <div className="infomaton-detail">
+                <div className="information-detail">
                   <div className="box">
-                    <h3 className="title-content">User Name</h3>
-                    <h4 className="content">{user?.userName}</h4>
+                    <h3 className="title-content">{t("userName")}</h3>
+                    <h4 className="content">{userInfo?.userName}</h4>
                   </div>
                   <div className="box">
-                    <h3 className="title-content">Status</h3>
+                    <h3 className="title-content">{t("status")}</h3>
                     <h4 className="content">
-                      {renderStatus(Number(user?.status))}
+                      {renderStatus(Number(userInfo?.status))}
                     </h4>
                   </div>
                 </div>
-                <div className="infomaton-detail">
+                <div className="information-detail">
                   <div className="box">
-                    <h3 className="title-content">Authencation</h3>
+                    <h3 className="title-content">{t("role")}</h3>
                     <h4 className="content">
-                      {renderRole(Number(user?.role))}
+                      {renderRole(Number(userInfo?.role))}
                     </h4>
                   </div>
                 </div>

@@ -4,6 +4,7 @@ import { collection, onSnapshot, query, where } from "firebase/firestore";
 import { db } from "../firebase-app/firebase-config";
 import { useParams } from "react-router-dom";
 import styled from "styled-components";
+import useGetUserPost from "../hooks/useGetUserPost";
 const CategoryPageStyles = styled.div``;
 
 const UserPage = () => {
@@ -24,11 +25,13 @@ const UserPage = () => {
           });
         });
         setPosts(results);
+        // setUserId(results);
       });
     }
     fetchData();
   }, [params.slug]);
   const [name] = posts;
+  const { user } = useGetUserPost(name?.user?.id);
   useEffect(() => {
     document.title = "User Blog Page";
   });
@@ -38,7 +41,7 @@ const UserPage = () => {
       <CategoryPageStyles>
         <LayoutCategory
           post={posts}
-          title={`các bài viết của ${name.user?.fullName}`}
+          title={`${user?.fullName}`}
         ></LayoutCategory>
       </CategoryPageStyles>
     </Layout>

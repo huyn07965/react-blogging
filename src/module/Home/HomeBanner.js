@@ -1,6 +1,7 @@
 import React from "react";
 import styled from "styled-components";
 import { Button } from "../../components";
+import { useTranslation } from "react-i18next";
 
 const HomeBannerStyles = styled.div`
   width: 100%;
@@ -97,6 +98,7 @@ const HomeBannerStyles = styled.div`
 `;
 
 const HomeBanner = () => {
+  const { t } = useTranslation();
   return (
     <HomeBannerStyles>
       <div className="container">
@@ -104,11 +106,12 @@ const HomeBanner = () => {
           <div className="banner-left">
             <h2 className="title-banner">Blogging</h2>
             <p className="content-banner">
-              Viết - Chia sẻ - Kết nối - Chiêm nghiệm <br></br>
+              {t("slogan")}
+              <br></br>
               <br></br>Tất cả tại Blogging
             </p>
             <Button type="button" to="/sign-up" className="button-banner">
-              Get Started
+              {t("getStarted")}
             </Button>
           </div>
           <div className="banner-right">

@@ -4,6 +4,7 @@ import { collection, onSnapshot, query, where } from "firebase/firestore";
 import { db } from "../firebase-app/firebase-config";
 import { useParams } from "react-router-dom";
 import styled from "styled-components";
+import useGetCategory from "../hooks/useGetCategory";
 const CategoryPageStyles = styled.div``;
 
 const CategoryPage = () => {
@@ -29,6 +30,7 @@ const CategoryPage = () => {
     fetchData();
   }, [params.slug]);
   const [name] = posts;
+  const { category } = useGetCategory(name?.category?.id);
   useEffect(() => {
     document.title = "Category Page";
   });
@@ -36,10 +38,7 @@ const CategoryPage = () => {
   return (
     <Layout>
       <CategoryPageStyles>
-        <LayoutCategory
-          post={posts}
-          title={name.category?.name}
-        ></LayoutCategory>
+        <LayoutCategory post={posts} title={category?.name}></LayoutCategory>
       </CategoryPageStyles>
     </Layout>
   );

@@ -6,6 +6,12 @@ import Postmeta from "./Postmeta";
 import PostTitle from "./PostTitle";
 import slugify from "slugify";
 import useViewport from "../../hooks/useViewPort";
+import { useAuth } from "../../contexts/auth-context";
+import SavePost from "../../components/savepost/SavePost";
+import { useNavigate } from "react-router-dom";
+import useSavePost from "../../hooks/useSavePost";
+import useGetCategory from "../../hooks/useGetCategory";
+import useGetUserPost from "../../hooks/useGetUserPost";
 
 const PostItemStyles = styled.div`
   .image {
@@ -19,10 +25,13 @@ const PostItemStyles = styled.div`
     padding: 20px 0;
   }
   .content-newest-top {
-    display: inline-block;
+    margin: 5px 0 15px 0;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
     font-size: 14px;
     font-weight: 500;
-    margin: 5px 0 15px 0;
   }
   .content-newest-center {
     max-width: 267px;
@@ -52,9 +61,15 @@ const PostItemStyles = styled.div`
 `;
 
 const PostItem = ({ data }) => {
+  const { userInfo } = useAuth();
+  const navigate = useNavigate();
+  const { category } = useGetCategory(data?.category?.id);
+  const { user } = useGetUserPost(data?.user?.id);
+  const { handleWatchLater, savePost } = useSavePost(data?.id);
   const viewPort = useViewport();
   const isMobile = viewPort.width <= 600;
-  if (!data || !data.id) return null;
+
+  if (!data.id) return null;
   return (
     <PostItemStyles>
       <div className="item">
@@ -62,15 +77,20 @@ const PostItem = ({ data }) => {
           className="image"
           url={data.image}
           alt="unplash"
-          to={data.slug}
+          to={data?.slug}
         ></PostImage>
         <div className="content">
-          <PostCategory to={data.category?.slug} className="content-newest-top">
-            {data?.category?.name}
-          </PostCategory>
+          <div className="content-newest-top">
+            <PostCategory to={category?.slug}>{category?.name}</PostCategory>
+            <SavePost
+              onClick={userInfo ? handleWatchLater : () => navigate("/sign-in")}
+              savePost={savePost}
+              data={data?.id}
+            ></SavePost>
+          </div>
           {!isMobile ? (
             <PostTitle
-              to={data.slug}
+              to={data?.slug}
               className="content-newest-center"
               title={data?.title}
             >
@@ -78,7 +98,7 @@ const PostItem = ({ data }) => {
             </PostTitle>
           ) : (
             <PostTitle
-              to={data.slug}
+              to={data?.slug}
               className="content-newest-center"
               title={data?.title}
             >
@@ -86,8 +106,8 @@ const PostItem = ({ data }) => {
             </PostTitle>
           )}
           <Postmeta
-            author={data?.user?.userName}
-            to={slugify(data?.user?.fullName || "", { lower: true })}
+            author={user?.userName}
+            to={slugify(user?.fullName || "", { lower: true })}
             date={data?.createdAt?.seconds}
           ></Postmeta>
         </div>

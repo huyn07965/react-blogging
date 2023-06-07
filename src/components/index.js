@@ -28,7 +28,8 @@ import Pagination from "./pagination/Pagination";
 import Table from "./table/Table";
 import Textarea from "./textarea/Textarea";
 import Toggle from "./toggle/Toggle";
-import WatchLater from "./watchlater/WatchLater";
+import SavePost from "./savepost/SavePost";
+import PostList from "./postlist/PostList";
 
 DropDown.Options = Options;
 DropDown.Search = Search;
@@ -61,5 +62,6 @@ export {
   Textarea,
   LayoutCategory,
   Footer,
-  WatchLater,
+  SavePost as WatchLater,
+  PostList,
 };

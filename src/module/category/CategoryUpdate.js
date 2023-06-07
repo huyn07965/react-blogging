@@ -1,17 +1,27 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import DashboardHeading from "../dashboard/DashboardHeading";
 import { Button, Field, Input, Label, Radio } from "../../components";
 import { useForm } from "react-hook-form";
 import { categoryValue, roleStatus } from "../../utils/constants";
 import styled from "styled-components";
-import { doc, getDoc, updateDoc } from "firebase/firestore";
+import {
+  collection,
+  doc,
+  getDoc,
+  getDocs,
+  onSnapshot,
+  query,
+  updateDoc,
+  where,
+} from "firebase/firestore";
 import { db } from "../../firebase-app/firebase-config";
 import slugify from "slugify";
 import { toast } from "react-toastify";
 import { useAuth } from "../../contexts/auth-context";
 import * as yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
+import { useTranslation } from "react-i18next";
 
 const CategoryUpdateStyles = styled.div`
   .category-layout {
@@ -43,6 +53,9 @@ const schema = yup.object({
 });
 const CategoryUpdate = () => {
   const { userInfo } = useAuth();
+  const { t } = useTranslation();
+  const [prevSlug, setPrevSlug] = useState("");
+  const [newSlug, setNewSlug] = useState("");
   const {
     control,
     watch,
@@ -61,10 +74,11 @@ const CategoryUpdate = () => {
       const singleDoc = await getDoc(colRef);
       //Reset dữ liệu các ô input về dữ liệu vừa mới lấy (singleDoc)
       reset(singleDoc.data());
+      setPrevSlug(singleDoc.data()?.slug);
     }
     getData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [categoryId, reset]);
-
   const handleUpdateCategory = async (values) => {
     const colRef = doc(db, "category", categoryId);
     await updateDoc(colRef, {
@@ -72,10 +86,9 @@ const CategoryUpdate = () => {
       slug: slugify(values.slug || values.name, { lower: true }),
       status: Number(values.status),
     });
-    toast.success("Update category successfully!");
-    navigate("/manage/category");
+    setNewSlug(slugify(values.slug, { lower: true }));
+    toast.success(`${t("toastUpdateCategory")}`);
   };
-  const watchStatus = watch("status");
   useEffect(() => {
     const arrErros = Object.values(errors);
     if (arrErros.length > 0) {
@@ -85,6 +98,37 @@ const CategoryUpdate = () => {
       });
     }
   }, [errors]);
+  const watchStatus = watch("status");
+
+  useEffect(() => {
+    if (prevSlug !== newSlug) {
+      async function fetchData() {
+        const colRef = collection(db, "posts");
+        const docPost = query(colRef, where("category.slug", "==", prevSlug));
+        onSnapshot(docPost, (snapshot) => {
+          let result = [];
+          snapshot.forEach((doc) => {
+            result.push({
+              id: doc.id,
+              ...doc.data(),
+            });
+          });
+          result.map((item) => {
+            const colRef = doc(db, "posts", item.id);
+            updateDoc(colRef, {
+              category: {
+                id: item?.category?.id,
+                slug: newSlug,
+              },
+            });
+          });
+        });
+      }
+      fetchData();
+      navigate("/manage/category");
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [newSlug.length > 0]);
   useEffect(() => {
     document.title = "Category Update Page";
   });
@@ -93,31 +137,31 @@ const CategoryUpdate = () => {
   return (
     <CategoryUpdateStyles>
       <DashboardHeading
-        title="Update Category"
-        desc={`Update Category your Id: ${categoryId}`}
+        title={t("updateCategory")}
+        desc={`${t("updateCategoryId")} ${categoryId}`}
       ></DashboardHeading>
       <form onSubmit={handleSubmit(handleUpdateCategory)}>
         <div className="category-layout">
           <Field>
-            <Label htmlFor="name">Name</Label>
+            <Label htmlFor="name">{t("name")}</Label>
             <Input
               control={control}
               name="name"
-              placeholder="Enter your category name"
+              placeholder={t("categoryPlace")}
             ></Input>
           </Field>
           <Field>
-            <Label htmlFor="slug">Slug</Label>
+            <Label htmlFor="slug">{t("slug")}</Label>
             <Input
               control={control}
               name="slug"
-              placeholder="Enter your slug"
+              placeholder={t("slugPlace")}
             ></Input>
           </Field>
         </div>
         <div className="category-layout">
           <Field>
-            <Label>Status</Label>
+            <Label>{t("status")}</Label>
             <div className="radio-category">
               <Radio
                 name="status"
@@ -145,7 +189,7 @@ const CategoryUpdate = () => {
           isLoading={isSubmitting}
           disabled={isSubmitting}
         >
-          Update Category
+          {t("updateCategory")}
         </Button>
       </form>
     </CategoryUpdateStyles>

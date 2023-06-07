@@ -8,6 +8,7 @@ import {
   ImageUpload,
   Input,
   Label,
+  Layout,
   Radio,
   Toggle,
 } from "../../components";
@@ -33,11 +34,13 @@ import { yupResolver } from "@hookform/resolvers/yup";
 import ReactQuill, { Quill } from "react-quill";
 import "react-quill/dist/quill.snow.css";
 import ImageUploader from "quill-image-uploader";
+import { useNavigate } from "react-router-dom";
 import DashboardHeading from "../dashboard/DashboardHeading";
 import { useTranslation } from "react-i18next";
 Quill.register("modules/imageUploader", ImageUploader);
 
 const PostAddNewStyles = styled.div`
+  padding: 20px 0;
   .add-post {
     display: grid;
     grid-template-columns: repeat(2, 45%);
@@ -75,7 +78,7 @@ const schema = yup.object({
     .required("Please enter title")
     .min(50, "Title must be least 50 characters"),
 });
-const PostAddNew = () => {
+const UserCreatePost = () => {
   const { userInfo } = useAuth();
   const { t } = useTranslation();
   const {
@@ -95,8 +98,8 @@ const PostAddNew = () => {
       status: 2,
       hot: false,
       image: "",
-      user: {},
-      category: {},
+      userId: "",
+      categoryId: "",
       createdAt: serverTimestamp(),
     },
   });
@@ -110,11 +113,11 @@ const PostAddNew = () => {
   } = usehandleImage(setValue, getValues);
   const watchStatus = watch("status");
   const watchHot = watch("hot");
-  const [categoryPost, setCategoryPost] = useState([]);
+  const [category, setCategory] = useState([]);
   const [selectCategory, setSelectCategory] = useState("");
   const [loading, setLoading] = useState(false);
   const [content, setContent] = useState("");
-
+  const navigate = useNavigate();
   useEffect(() => {
     if (!userInfo?.uid) return;
     setValue("user", {
@@ -152,6 +155,7 @@ const PostAddNew = () => {
       setSelectCategory("");
       setContent("");
       setProgress(0);
+      navigate(`/userinfo?id=${userInfo.uid}`);
       document.body.scrollIntoView({ behavior: "smooth", block: "start" });
     } catch (erorr) {
       setLoading(false);
@@ -171,7 +175,7 @@ const PostAddNew = () => {
           ...doc.data(),
         });
       });
-      setCategoryPost(result);
+      setCategory(result);
     }
     getData();
   }, []);
@@ -224,131 +228,113 @@ const PostAddNew = () => {
     }
   }, [errors]);
   useEffect(() => {
+    document.body.scrollIntoView({ behavior: "smooth", block: "start" });
+  }, []);
+  useEffect(() => {
     document.title = "Post Add Page";
   });
-  if (userInfo?.role !== roleStatus.Admin) return null;
   return (
-    <PostAddNewStyles>
-      <DashboardHeading
-        title={t("newPost")}
-        desc={t("addNewPost")}
-      ></DashboardHeading>
-      <form onSubmit={handleSubmit(addPost)}>
-        <div className="add-post">
-          <Field>
-            <Label htmlFor="title">{t("title")}</Label>
-            <Input
-              control={control}
-              placeholder={t("titlePlace")}
-              name="title"
-            ></Input>
-          </Field>
-          <Field>
-            <Label htmlFor="slug">{t("slug")}</Label>
-            <Input
-              control={control}
-              placeholder={t("slugPlace")}
-              name="slug"
-            ></Input>
-          </Field>
-        </div>
-        <div className="add-post">
-          <Field>
-            <Label>{t("status")}</Label>
-            <div className="status">
-              <Radio
-                name="status"
-                control={control}
-                checked={Number(watchStatus) === postValue.Approved}
-                onClick={() => setValue("status", "approved")}
-                value={postValue.Approved}
-              >
-                Approved
-              </Radio>
-              <Radio
-                name="status"
-                control={control}
-                checked={Number(watchStatus) === postValue.Pending}
-                onClick={() => setValue("status", "pending")}
-                value={postValue.Pending}
-              >
-                Pending
-              </Radio>
-              <Radio
-                name="status"
-                control={control}
-                checked={Number(watchStatus) === postValue.Reject}
-                onClick={() => setValue("status", "reject")}
-                value={postValue.Reject}
-              >
-                Reject
-              </Radio>
+    <Layout>
+      <PostAddNewStyles>
+        <div className="container">
+          <DashboardHeading
+            title={t("newPost")}
+            desc={t("addNewPost")}
+          ></DashboardHeading>
+          <form onSubmit={handleSubmit(addPost)}>
+            <div className="add-post">
+              <Field>
+                <Label htmlFor="title">{t("title")}</Label>
+                <Input
+                  control={control}
+                  placeholder={t("titlePlace")}
+                  name="title"
+                ></Input>
+              </Field>
+              <Field>
+                <Label htmlFor="slug">{t("slug")}</Label>
+                <Input
+                  control={control}
+                  placeholder={t("slugPlace")}
+                  name="slug"
+                ></Input>
+              </Field>
             </div>
-          </Field>
-          <Field>
-            <Label>{t("category")}</Label>
-            <DropDown>
-              <DropDown.Select
-                placeholder={`${
-                  selectCategory?.name || "Please select an option"
-                }`}
-              ></DropDown.Select>
-              <DropDown.List>
-                {categoryPost?.map((item) => (
-                  <DropDown.Options
-                    key={item.id}
-                    onClick={() => handleOnClick(item)}
-                  >
-                    {item.name}
-                  </DropDown.Options>
-                ))}
-              </DropDown.List>
-            </DropDown>
-          </Field>
+            <div className="add-post">
+              <Field>
+                <Label>{t("status")}</Label>
+                <div className="status">
+                  <Radio name="status" control={control} checked={true}>
+                    Pending
+                  </Radio>
+                </div>
+              </Field>
+              <Field>
+                <Label>{t("category")}</Label>
+                <DropDown>
+                  <DropDown.Select
+                    placeholder={`${
+                      selectCategory?.name || "Please select an option"
+                    }`}
+                  ></DropDown.Select>
+                  <DropDown.List>
+                    {category?.map((item) => (
+                      <DropDown.Options
+                        key={item.id}
+                        onClick={() => handleOnClick(item)}
+                      >
+                        {item.name}
+                      </DropDown.Options>
+                    ))}
+                  </DropDown.List>
+                </DropDown>
+              </Field>
+            </div>
+            <div className="add-post">
+              <Field>
+                <Label>{t("uploadImage")}</Label>
+                <ImageUpload
+                  name="image"
+                  post={true}
+                  className="image-select"
+                  image={image}
+                  handleDeleteImage={handleDeleteImage}
+                  progress={progress}
+                  onChange={handleSelectImage}
+                ></ImageUpload>
+              </Field>
+              <Field>
+                <Label>{t("feature")}</Label>
+                <Toggle
+                  on={watchHot === true}
+                  onClick={() => setValue("hot", !watchHot)}
+                ></Toggle>
+              </Field>
+            </div>
+            <div className="content entry-content">
+              <Label>{t("content")}</Label>
+              <div>
+                <ReactQuill
+                  modules={modules}
+                  theme="snow"
+                  value={content}
+                  onChange={setContent}
+                />
+              </div>
+            </div>
+            <Button
+              type="submit"
+              className="button-add"
+              isLoading={loading}
+              disabled={loading}
+            >
+              {t("addNewPost")}
+            </Button>
+          </form>
         </div>
-        <div className="add-post">
-          <Field>
-            <Label>{t("uploadImage")}</Label>
-            <ImageUpload
-              name="image"
-              post={true}
-              className="image-select"
-              image={image}
-              handleDeleteImage={handleDeleteImage}
-              progress={progress}
-              onChange={handleSelectImage}
-            ></ImageUpload>
-          </Field>
-          <Field>
-            <Label>{t("feature")}</Label>
-            <Toggle
-              on={watchHot === true}
-              onClick={() => setValue("hot", !watchHot)}
-            ></Toggle>
-          </Field>
-        </div>
-        <div className="content entry-content">
-          <Label>{t("content")}</Label>
-          <div>
-            <ReactQuill
-              modules={modules}
-              theme="snow"
-              value={content}
-              onChange={setContent}
-            />
-          </div>
-        </div>
-        <Button
-          type="submit"
-          className="button-add"
-          isLoading={loading}
-          disabled={loading}
-        >
-          {t("addNewPost")}
-        </Button>
-      </form>
-    </PostAddNewStyles>
+      </PostAddNewStyles>
+    </Layout>
   );
 };
 
-export default PostAddNew;
+export default UserCreatePost;
