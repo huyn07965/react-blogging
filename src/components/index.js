@@ -30,11 +30,29 @@ import Textarea from "./textarea/Textarea";
 import Toggle from "./toggle/Toggle";
 import SavePost from "./savepost/SavePost";
 import PostList from "./postlist/PostList";
+import IconUserFollow from "./icon/IconUserFollow";
+import Comment from "./comment/Comment";
+import IconEdit from "./icon/IconEdit";
+import IconReport from "./icon/IconReport";
+import IconDelete from "./icon/IconDelete";
+import IconView from "./icon/IconView";
+import IconComment from "./icon/IconComment";
+import DetailPageLoading from "./loadingSkeleton/DetailPageLoading";
+import BlogLoading from "./loadingSkeleton/BlogLoading";
+import HomeFeatureLoading from "./loadingSkeleton/HomeFeatureLoading";
+import PostNewestLargeLoading from "./loadingSkeleton/PostNewestLargeLoading";
+import PostNewestItemsLoading from "./loadingSkeleton/PostNewestItemsLoading";
+import HomeItemMoreLoading from "./loadingSkeleton/HomeItemMoreLoading";
+import Report from "./report/Report";
+import Chart from "./chart/Chart";
+import Notification from "./notification/Notification";
+import IconLikeComment from "./icon/IconLikeComment";
 
 DropDown.Options = Options;
 DropDown.Search = Search;
 DropDown.Select = Select;
 DropDown.List = List;
+
 export {
   Button,
   CheckBox,
@@ -64,4 +82,21 @@ export {
   Footer,
   SavePost as WatchLater,
   PostList,
+  IconUserFollow,
+  Comment,
+  IconEdit,
+  IconReport,
+  IconDelete,
+  IconView,
+  IconLikeComment,
+  IconComment,
+  DetailPageLoading,
+  BlogLoading,
+  HomeFeatureLoading,
+  PostNewestLargeLoading,
+  PostNewestItemsLoading,
+  HomeItemMoreLoading,
+  Report,
+  Chart,
+  Notification,
 };

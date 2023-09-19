@@ -2,7 +2,7 @@ import React from "react";
 import styled from "styled-components";
 
 const HeadingStyles = styled.div`
-  margin-bottom: 10px;
+  /* margin-bottom: 10px; */
   font-size: 28px;
   font-weight: 600;
   color: ${(props) => props.theme.primary};

@@ -2,16 +2,13 @@ import React from "react";
 import styled from "styled-components";
 import PostCategory from "./PostCategory";
 import PostImage from "./PostImage";
-import Postmeta from "./Postmeta";
+import PostMeta from "./PostMeta";
 import PostTitle from "./PostTitle";
-import slugify from "slugify";
 import useViewport from "../../hooks/useViewPort";
 import { useAuth } from "../../contexts/auth-context";
 import SavePost from "../../components/savepost/SavePost";
 import { useNavigate } from "react-router-dom";
 import useSavePost from "../../hooks/useSavePost";
-import useGetCategory from "../../hooks/useGetCategory";
-import useGetUserPost from "../../hooks/useGetUserPost";
 
 const PostItemStyles = styled.div`
   .image {
@@ -61,15 +58,13 @@ const PostItemStyles = styled.div`
 `;
 
 const PostItem = ({ data }) => {
-  const { userInfo } = useAuth();
+  const { userInfo, save, setSave } = useAuth();
+  const itemLng = localStorage.getItem("lng");
   const navigate = useNavigate();
-  const { category } = useGetCategory(data?.category?.id);
-  const { user } = useGetUserPost(data?.user?.id);
-  const { handleWatchLater, savePost } = useSavePost(data?.id);
+  const { handleWatchLater, savePost } = useSavePost(data._id);
   const viewPort = useViewport();
   const isMobile = viewPort.width <= 600;
-
-  if (!data.id) return null;
+  if (!data._id) return null;
   return (
     <PostItemStyles>
       <div className="item">
@@ -81,35 +76,48 @@ const PostItem = ({ data }) => {
         ></PostImage>
         <div className="content">
           <div className="content-newest-top">
-            <PostCategory to={category?.slug}>{category?.name}</PostCategory>
+            <PostCategory to={data.category?.slug}>
+              {itemLng === "vn" ? data.category?.name : data.category?.nameEN}
+            </PostCategory>
             <SavePost
-              onClick={userInfo ? handleWatchLater : () => navigate("/sign-in")}
+              onClick={
+                userInfo
+                  ? () => {
+                      handleWatchLater();
+                      setSave(!save);
+                    }
+                  : () => navigate("/sign-in")
+              }
               savePost={savePost}
-              data={data?.id}
+              data={data?._id}
             ></SavePost>
           </div>
           {!isMobile ? (
             <PostTitle
               to={data?.slug}
               className="content-newest-center"
-              title={data?.title}
+              title={itemLng === "vn" ? data?.title : data?.titleEN}
             >
-              {data.title?.slice(0, 50) + "..."}
+              {itemLng === "vn"
+                ? data.title?.slice(0, 45) + "..."
+                : data?.titleEN?.slice(0, 45) + "..."}
             </PostTitle>
           ) : (
             <PostTitle
               to={data?.slug}
               className="content-newest-center"
-              title={data?.title}
+              title={itemLng === "vn" ? data?.title : data?.titleEN}
             >
-              {data.title?.slice(0, 90) + "..."}
+              {itemLng === "vn"
+                ? data.title?.slice(0, 90) + "..."
+                : data?.titleEN?.slice(0, 90) + "..."}
             </PostTitle>
           )}
-          <Postmeta
-            author={user?.userName}
-            to={slugify(user?.fullName || "", { lower: true })}
-            date={data?.createdAt?.seconds}
-          ></Postmeta>
+          <PostMeta
+            author={data.user?.userName}
+            to={data.user?.id}
+            date={data?.createdAt}
+          ></PostMeta>
         </div>
       </div>
     </PostItemStyles>

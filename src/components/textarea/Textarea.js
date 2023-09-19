@@ -1,6 +1,6 @@
 import React from "react";
 import { useController } from "react-hook-form";
-import styled from "styled-components";
+import styled, { css } from "styled-components";
 const TextareaStyles = styled.div`
   position: relative;
   width: 100%;
@@ -15,6 +15,12 @@ const TextareaStyles = styled.div`
     font-size: 14px;
     resize: none;
     min-height: 200px;
+    ${(props) =>
+      props.disabled === true &&
+      css`
+        opacity: 0.5;
+        pointer-events: none;
+      `};
   }
   textarea::-webkit-input-placeholder {
     color: #b2b3bd;
@@ -33,6 +39,7 @@ const Textarea = ({
   type = "text",
   children,
   control,
+  disabled = false,
   ...props
 }) => {
   const { field } = useController({
@@ -41,7 +48,7 @@ const Textarea = ({
     defaultValue: "",
   });
   return (
-    <TextareaStyles>
+    <TextareaStyles disabled={disabled}>
       <textarea id={name} type={type} {...field} {...props} />
     </TextareaStyles>
   );

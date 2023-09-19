@@ -2,7 +2,7 @@ import React from "react";
 import styled from "styled-components";
 import PostCategory from "./PostCategory";
 import PostImage from "./PostImage";
-import Postmeta from "./Postmeta";
+import PostMeta from "./PostMeta";
 import PostTitle from "./PostTitle";
 import slugify from "slugify";
 
@@ -92,13 +92,14 @@ const PostFeatureItem = ({ data }) => {
           <div className="content">
             <div className="content-top">
               <PostCategory to={category.slug}>{category?.name}</PostCategory>
-              <Postmeta
+              <PostMeta
                 author={user?.userName}
-                to={slugify(user?.fullName || "", { lower: true })}
+                // to={slugify(user?.fullName || "", { lower: true })}
+                to={user._id}
                 date={formatDate}
                 colors
                 className="content-info"
-              ></Postmeta>
+              ></PostMeta>
             </div>
             <PostTitle to={data.slug} size="big" colors title={data.title}>
               {data.title}

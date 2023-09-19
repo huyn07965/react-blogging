@@ -1,14 +1,11 @@
 import React from "react";
 import styled from "styled-components";
 import { Button, Layout } from "../../components";
-import { Link, useNavigate, useSearchParams } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useEffect } from "react";
-import { doc, getDoc } from "firebase/firestore";
-import { auth, db } from "../../firebase-app/firebase-config";
 import { useState } from "react";
 import { roleStatus } from "../../utils/constants";
 import { useAuth } from "../../contexts/auth-context";
-import { signOut } from "firebase/auth";
 import NotFoundPage from "../../pages/NotFoundPage";
 import { toast } from "react-toastify";
 import { useTranslation } from "react-i18next";
@@ -179,14 +176,15 @@ const UserInfoStyles = styled.div`
 `;
 
 const UserInfo = () => {
-  const { userInfo } = useAuth();
+  const { userInfo, signIn, setSignIn } = useAuth();
+  const itemLng = localStorage.getItem("lng");
+
   const { t } = useTranslation();
-  const [params] = useSearchParams();
   const [userAuth, setUserAuth] = useState(false);
-  const userId = params.get("id");
   const navigate = useNavigate();
   const handleSignOut = () => {
-    signOut(auth);
+    localStorage.removeItem("token");
+    setSignIn(!signIn);
     navigate("/");
     toast.success(`${t("signOutSuccess")}`);
   };
@@ -213,13 +211,16 @@ const UserInfo = () => {
       case 1:
         return "Admin";
       case 2:
-        return "Moderator";
+        return "Author";
       case 3:
         return "User";
       default:
         break;
     }
   };
+  useEffect(() => {
+    document.body.scrollIntoView({ behavior: "smooth", block: "start" });
+  }, []);
   useEffect(() => {
     document.title = "User information Page";
   });
@@ -253,7 +254,9 @@ const UserInfo = () => {
               <div className="function">
                 {userInfo?.role == roleStatus.Admin ? (
                   <h3
-                    onClick={() => navigate(`/manage/update-user?id=${userId}`)}
+                    onClick={() =>
+                      navigate(`/manage/update-user?id=${userInfo._id}`)
+                    }
                     className="name-function active"
                   >
                     {t("editAccount")}
@@ -261,7 +264,7 @@ const UserInfo = () => {
                 ) : (
                   <h3
                     className="name-function active"
-                    onClick={() => navigate(`/edit-user?id=${userId}`)}
+                    onClick={() => navigate(`/edit-user?id=${userInfo._id}`)}
                   >
                     {t("editAccount")}
                   </h3>
@@ -272,24 +275,37 @@ const UserInfo = () => {
                 >
                   {t("watchLater")}
                 </h3>
-                {userInfo?.role == roleStatus.Admin ? (
-                  <Link className="name-function" to="/manage/add-post">
-                    {t("createPost")}
-                  </Link>
+                {userInfo?.role === 2 || userInfo?.role === 1 ? (
+                  <>
+                    {userInfo?.role === roleStatus.Admin ? (
+                      <Link className="name-function" to="/manage/add-post">
+                        {t("createPost")}
+                      </Link>
+                    ) : (
+                      <Link to="/create-post" className="name-function">
+                        {t("createPost")}
+                      </Link>
+                    )}
+                  </>
                 ) : (
-                  <Link to="/create-post" className="name-function">
-                    {t("createPost")}
-                  </Link>
+                  <></>
                 )}
-                {userInfo?.role == roleStatus.Admin ? (
-                  <Link className="name-function" to="/manage/user">
-                    {t("myPost")}
-                  </Link>
+                {userInfo?.role === 2 || userInfo?.role === 1 ? (
+                  <>
+                    {userInfo?.role == roleStatus.Admin ? (
+                      <Link className="name-function" to="/manage/user">
+                        {t("myPost")}
+                      </Link>
+                    ) : (
+                      <Link to="/user-post" className="name-function">
+                        {t("myPost")}
+                      </Link>
+                    )}
+                  </>
                 ) : (
-                  <Link to="/user-post" className="name-function">
-                    {t("myPost")}
-                  </Link>
+                  <></>
                 )}
+
                 {userInfo?.email && (
                   <p onClick={handleSignOut} className="name-function">
                     {t("signOut")}
@@ -301,8 +317,10 @@ const UserInfo = () => {
               <div className="information-right-top">
                 <h2 className="title-user">{t("personalInfo")}</h2>
                 <h4 className="description">
-                  Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed
-                  do eiusmod tempor incididunt ut labore et dolore magna aliqua.
+                  {itemLng === "vn"
+                    ? userInfo?.description
+                    : userInfo?.descriptionEN ||
+                      "Lorem ipsum dolor sit amet, consectetur adipiscing elit, seddo eiusmod tempor incididunt ut labore et dolore magna aliqua."}
                 </h4>
               </div>
               <div className="information-right-bottom">
@@ -314,9 +332,9 @@ const UserInfo = () => {
                   <div className="box">
                     <h3 className="title-content">{t("createAt")}</h3>
                     <h4 className="content">
-                      {new Date(
-                        userInfo?.createdAt?.seconds * 1000
-                      ).toLocaleDateString("vi-VI")}
+                      {new Date(userInfo?.createdAt).toLocaleDateString(
+                        "vi-VI"
+                      )}
                     </h4>
                   </div>
                 </div>

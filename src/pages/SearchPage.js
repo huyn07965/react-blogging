@@ -1,10 +1,10 @@
 import React, { useEffect, useState } from "react";
-import { collection, onSnapshot } from "firebase/firestore";
-import { db } from "../firebase-app/firebase-config";
 import { useSearchParams } from "react-router-dom";
-import { Layout, LayoutCategory } from "../components";
+import { BlogLoading, Layout, LayoutCategory } from "../components";
 import styled from "styled-components";
-import slugify from "slugify";
+import useSearch from "../hooks/useSearch";
+import axios from "axios";
+import { baseUrl } from "../utils/constants";
 
 const SearchPageStyles = styled.div`
   .image-not-found {
@@ -25,39 +25,27 @@ const SearchPageStyles = styled.div`
 `;
 const SearchPage = () => {
   const [params] = useSearchParams();
-  const [post, setPost] = useState([]);
   const textSearch = params.get("title");
+  const [post, setPost] = useState([]);
+
   useEffect(() => {
     async function fetchData() {
-      const colRef = collection(db, "posts");
-      onSnapshot(colRef, (snapshot) => {
-        let result = [];
-        snapshot.forEach((doc) => {
-          result.push({
-            id: doc.id,
-            ...doc.data(),
-          });
-        });
-        if (textSearch <= 0) return;
-        const postSearch = result.filter((value) => {
-          const values = slugify(value.title, {
-            lower: true,
-            replacement: " ",
-            trim: true,
-          });
-          return values.toUpperCase().includes(textSearch.toUpperCase());
-        });
-        setPost(postSearch);
-      });
+      await axios
+        .get(baseUrl.getAllPost)
+        .then((result) => {
+          setPost(result.data);
+        })
+        .catch((err) => console.log(err));
     }
     fetchData();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [textSearch]);
 
-  return (
-    <SearchPageStyles>
-      <Layout>
-        {post?.length <= 0 ? (
+  const { dataSearch, loading } = useSearch(post, textSearch);
+
+  if (dataSearch.length <= 0)
+    return (
+      <SearchPageStyles>
+        <Layout>
           <div className="container">
             <h2>Data Not Found</h2>
             <img
@@ -66,10 +54,22 @@ const SearchPage = () => {
               alt="not-fond"
             />
           </div>
+        </Layout>
+      </SearchPageStyles>
+    );
+
+  return (
+    <SearchPageStyles>
+      <Layout>
+        {loading ? (
+          <div className="container">
+            <BlogLoading></BlogLoading>
+          </div>
         ) : (
           <LayoutCategory
-            post={post}
+            post={dataSearch}
             title={`tìm kiếm ${textSearch}`}
+            showFilter={false}
           ></LayoutCategory>
         )}
       </Layout>

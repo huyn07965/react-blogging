@@ -20,7 +20,7 @@ const LabelStatusStyles = styled.span`
   }
   &.danger {
     color: ${(props) => props.theme.redDark};
-    background-color: ${(props) => props.theme.redLignt};
+    background-color: ${(props) => props.theme.redLight};
   }
 `;
 const LabelStatus = ({ children, type = "default" }) => {

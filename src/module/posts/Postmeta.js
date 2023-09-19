@@ -2,7 +2,7 @@ import React from "react";
 import { NavLink } from "react-router-dom";
 import styled, { css } from "styled-components";
 
-const PostmetaStyles = styled.div`
+const PostMetaStyles = styled.div`
   color: #6b6b6b;
   display: flex;
   align-items: center;
@@ -25,24 +25,24 @@ const PostmetaStyles = styled.div`
     margin-top: 0px;
   }
 `;
-const Postmeta = ({
+const PostMeta = ({
   date = "Mar 23",
   author = "Andiez Le",
   className = "",
   colors = false,
   to = "",
 }) => {
-  const dateMeta = date ? new Date(date * 1000) : new Date();
-  const formatDate = new Date(dateMeta).toLocaleDateString("vi-VI");
+  const formatDate = new Date(date).toLocaleDateString("vi-VI");
+
   return (
-    <PostmetaStyles className={className} colors={colors} to={to}>
+    <PostMetaStyles className={className} colors={colors} to={to}>
       <span className="content-date">{formatDate}</span>
       <div className="content-circle"></div>
       <NavLink to={`/user/${to}`}>
         <span className="content-name">{author}</span>
       </NavLink>
-    </PostmetaStyles>
+    </PostMetaStyles>
   );
 };
 
-export default Postmeta;
+export default PostMeta;

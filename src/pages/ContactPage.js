@@ -1,8 +1,11 @@
 import React, { useEffect, useState } from "react";
 import styled from "styled-components";
-import { collection, onSnapshot, query, where } from "firebase/firestore";
+import { collection, onSnapshot, query } from "firebase/firestore";
 import { db } from "../firebase-app/firebase-config";
 import { Layout } from "../components";
+import axios from "axios";
+import { baseUrl } from "../utils/constants";
+
 const ContactPageStyles = styled.div`
   padding: 10px 20px;
   .content-center {
@@ -15,20 +18,17 @@ const ContactPageStyles = styled.div`
 `;
 const ContactPage = () => {
   const [contact, setContact] = useState({});
+
   useEffect(() => {
-    async function fetchData() {
-      const colRef = query(collection(db, "contact"));
-      onSnapshot(colRef, (snapshot) => {
-        snapshot.forEach((doc) => {
-          doc.data() &&
-            setContact({
-              ...doc.data(),
-            });
-        });
-      });
+    async function getData() {
+      await axios
+        .get(baseUrl.getContact + "64e193ea5ca8feebbb89fa8c")
+        .then((result) => setContact(result.data.content))
+        .catch((err) => console.log(err));
     }
-    fetchData();
+    getData();
   }, []);
+
   useEffect(() => {
     document.title = "Contact Page";
   });
@@ -39,7 +39,7 @@ const ContactPage = () => {
           <div
             className="entry-content"
             dangerouslySetInnerHTML={{
-              __html: contact?.content || "",
+              __html: contact || "",
             }}
           ></div>
         </div>

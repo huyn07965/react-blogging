@@ -1,7 +1,10 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import styled from "styled-components";
 import { Button } from "../../components";
 import { useTranslation } from "react-i18next";
+import axios from "axios";
+import { baseUrl } from "../../utils/constants";
+import { useAuth } from "../../contexts/auth-context";
 
 const HomeBannerStyles = styled.div`
   width: 100%;
@@ -98,7 +101,20 @@ const HomeBannerStyles = styled.div`
 `;
 
 const HomeBanner = () => {
+  const { userInfo } = useAuth();
   const { t } = useTranslation();
+  const [banner, setBanner] = useState();
+  const itemLng = localStorage.getItem("lng");
+  // 65006457d3e9342858cc9dba
+  useEffect(() => {
+    async function fetchData() {
+      axios
+        .get(baseUrl.getBanner + "65006457d3e9342858cc9dba")
+        .then((result) => setBanner(result.data))
+        .catch((err) => console.log(err));
+    }
+    fetchData();
+  }, []);
   return (
     <HomeBannerStyles>
       <div className="container">
@@ -106,16 +122,22 @@ const HomeBanner = () => {
           <div className="banner-left">
             <h2 className="title-banner">Blogging</h2>
             <p className="content-banner">
-              {t("slogan")}
+              {itemLng === "vn" ? banner?.title : banner?.titleEN}
               <br></br>
-              <br></br>Tất cả tại Blogging
+              <br></br>
+              {t("slogan2")}
             </p>
-            <Button type="button" to="/sign-up" className="button-banner">
+            <Button
+              type="button"
+              to={userInfo?.role === 1 ? "/dashboard" : "/sign-up-author"}
+              // to="/sign-up-author"
+              className="button-banner"
+            >
               {t("getStarted")}
             </Button>
           </div>
           <div className="banner-right">
-            <img src="./banner-img.png" className="image-banner" alt="" />
+            <img src={banner?.image} className="image-banner" alt="" />
           </div>
         </div>
       </div>

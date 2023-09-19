@@ -8,6 +8,9 @@ const FooterStyles = styled.div`
   min-height: 220px;
   background-color: ${(props) => props.theme.greyLight};
   padding: 20px;
+  Link {
+    cursor: pointer;
+  }
   .container {
     width: 100%;
     height: 100%;
@@ -79,15 +82,15 @@ const Footer = () => {
         </div>
         <div className="footer">
           <h3>{t("info")}</h3>
-          <Link>{t("company")}</Link>
-          <p>CEO</p>
+          <Link to="/contact">{t("company")}</Link>
+          <Link>{t("rule")}</Link>
           <Link to="/contact">{t("about")}</Link>
         </div>
         <div className="footer">
           <h3>{t("account")}</h3>
           <Link to="/sign-in">{t("signIn")}</Link>
           <Link to="/sign-up">{t("signUp")}</Link>
-          <Link>{t("support")}</Link>
+          <Link to="/reset-pass">{t("resetPass")}</Link>
         </div>
         <div className="footerLast">
           <h3>{t("contact")}</h3>

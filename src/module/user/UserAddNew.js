@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import styled from "styled-components";
 import {
@@ -9,16 +9,14 @@ import {
   Label,
 } from "../../components";
 import DashboardHeading from "../dashboard/DashboardHeading";
-import { doc, serverTimestamp, setDoc } from "firebase/firestore";
-import { auth, db } from "../../firebase-app/firebase-config";
-import { createUserWithEmailAndPassword } from "firebase/auth";
 import slugify from "slugify";
 import { toast } from "react-toastify";
 import { useAuth } from "../../contexts/auth-context";
-import { roleStatus } from "../../utils/constants";
+import { baseUrl, roleStatus } from "../../utils/constants";
 import * as yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { useTranslation } from "react-i18next";
+import axios from "axios";
 
 const UserAddNewStyles = styled.div`
   .user-layout {
@@ -39,21 +37,21 @@ const UserAddNewStyles = styled.div`
     }
   }
 `;
-const schema = yup.object({
-  fullName: yup.string().required("Please enter full name"),
-  userName: yup
-    .string()
-    .required("Please enter user name")
-    .max(9, "Username must be less than 10 characters"),
-  email: yup
-    .string()
-    .required("Please enter email address")
-    .email("Please enter valid email address"),
-  password: yup
-    .string()
-    .required("Please enter password")
-    .min(8, "Password must be least 8 characters"),
-});
+// const schema = yup.object({
+//   fullName: yup.string().required("Please enter full name"),
+//   userName: yup
+//     .string()
+//     .required("Please enter user name")
+//     .max(9, "Username must be less than 10 characters"),
+//   email: yup
+//     .string()
+//     .required("Please enter email address")
+//     .email("Please enter valid email address"),
+//   password: yup
+//     .string()
+//     .required("Please enter password")
+//     .min(8, "Password must be least 8 characters"),
+// });
 const UserAddNew = () => {
   const { userInfo } = useAuth();
   const { t } = useTranslation();
@@ -61,37 +59,64 @@ const UserAddNew = () => {
     control,
     handleSubmit,
     formState: { isSubmitting, isValid, errors },
+    reset,
   } = useForm({
     mode: "onChange",
-    resolver: yupResolver(schema),
+    // resolver: yupResolver(schema),
     defaultValues: {
+      avatar: "/user.jpg",
       email: "",
       fullName: "",
+      userName: "",
       password: "",
-      createdAt: new Date(),
-    },
-  });
-  const handleAddUser = async (values) => {
-    if (!isValid) return null;
-    await createUserWithEmailAndPassword(auth, values.email, values.password);
-    // await updateProfile(auth.currentUser, { displayName: values.fullName });
-    toast.success(`${t("toastCreateUser")}`);
-    await setDoc(doc(db, "users", auth.currentUser.uid), {
-      fullName: values.fullName,
-      email: values.email,
-      password: values.password,
-      userName: values.userName,
-      slug: slugify(values.fullName, {
-        lower: true,
-        // replacement: "",
-        // trim: true,
-      }),
+      slug: "",
       role: 3,
       status: 1,
-      avatar: "/user.jpg",
-      createdAt: serverTimestamp(),
+      description: "",
       watchLater: [],
-    });
+      likePost: [],
+      follow: [],
+      follower: [],
+      // createdAt: new Date(),
+    },
+  });
+  const [password, setPassword] = useState("");
+  const handlePassChange = (value) => {
+    setPassword(value);
+  };
+  const handleAddUser = async (values) => {
+    if (!isValid) return null;
+    toast.success(`${t("toastCreateUser")}`);
+    const newValues = { ...values };
+    newValues.slug = slugify(values.slug || values.fullName, { lower: true });
+    newValues.status = Number(newValues.status);
+    newValues.password = password;
+    try {
+      await axios
+        .post(baseUrl.creteUser, newValues)
+        .then((result) => console.log(result))
+        .catch((err) => console.log(err));
+    } catch (error) {
+      // toast.success(`${t("toastCreateCategory")}`);
+      console.log(error);
+    } finally {
+      reset({
+        avatar: "/user.jpg",
+        email: "",
+        fullName: "",
+        userName: "",
+        password: "",
+        slug: "",
+        role: 3,
+        status: 1,
+        description: "",
+        watchLater: [],
+        likePost: [],
+        follow: [],
+        follower: [],
+      });
+      setPassword("");
+    }
   };
   useEffect(() => {
     const arrErros = Object.values(errors);
@@ -102,6 +127,7 @@ const UserAddNew = () => {
       });
     }
   }, [errors]);
+
   useEffect(() => {
     document.title = "User Add Page";
   });
@@ -143,7 +169,11 @@ const UserAddNew = () => {
           </Field>
           <Field>
             <Label htmlFor="userName">{t("pass")}</Label>
-            <InputPasswordToogle control={control}></InputPasswordToogle>
+            <InputPasswordToogle
+              control={control}
+              value={password}
+              onChange={handlePassChange}
+            ></InputPasswordToogle>
           </Field>
         </div>
         <Button

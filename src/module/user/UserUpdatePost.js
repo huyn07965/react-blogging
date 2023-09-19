@@ -1,15 +1,6 @@
-import {
-  collection,
-  doc,
-  getDoc,
-  getDocs,
-  query,
-  updateDoc,
-  where,
-} from "firebase/firestore";
 import React, { useMemo } from "react";
 import { useForm } from "react-hook-form";
-import styled from "styled-components";
+import styled, { css } from "styled-components";
 import { useAuth } from "../../contexts/auth-context";
 import {
   Button,
@@ -22,9 +13,8 @@ import {
   Radio,
   Toggle,
 } from "../../components";
-import { postValue, roleStatus } from "../../utils/constants";
+import { baseUrl, postValue } from "../../utils/constants";
 import { useEffect } from "react";
-import { db } from "../../firebase-app/firebase-config";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import useHandleImage from "../../hooks/useHandleImage";
 import { useState } from "react";
@@ -38,6 +28,7 @@ import axios from "axios";
 import slugify from "slugify";
 import DashboardHeading from "../dashboard/DashboardHeading";
 import { useTranslation } from "react-i18next";
+import useGetCategory from "../../hooks/useGetCategory";
 Quill.register("modules/imageUploader", ImageUploader);
 const PostUpdateStyles = styled.div`
   .update-post {
@@ -63,6 +54,63 @@ const PostUpdateStyles = styled.div`
     flex-direction: column;
     row-gap: 20px;
   }
+  .title-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .show-content {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    font-size: 16px;
+    gap: 5px;
+  }
+  .vn {
+    cursor: pointer;
+    padding: 5px 20px;
+    display: flex;
+    align-items: center;
+    color: white;
+    background-color: ${(props) => props.theme.primary};
+    border-radius: 8px;
+    ${(props) =>
+      props.showContentEn === true &&
+      css`
+        background-color: ${(props) => props.theme.greyLight};
+        color: black;
+      `}
+  }
+  .en {
+    cursor: pointer;
+    padding: 5px 20px;
+    display: flex;
+    align-items: center;
+    background-color: ${(props) => props.theme.greyLight};
+    border-radius: 8px;
+    ${(props) =>
+      props.showContentEn === true &&
+      css`
+        background-color: ${(props) => props.theme.primary};
+        color: white;
+      `}
+  }
+  .content-vn {
+    display: block;
+    ${(props) =>
+      props.showContentEn === true &&
+      css`
+        display: none;
+      `}
+  }
+  .content-en {
+    display: none;
+    ${(props) =>
+      props.showContentEn === true &&
+      css`
+        display: block;
+      `}
+  }
   @media screen and (max-width: 600px) {
     .update-post {
       width: 100%;
@@ -71,14 +119,15 @@ const PostUpdateStyles = styled.div`
     }
   }
 `;
-const schema = yup.object({
-  title: yup
-    .string()
-    .required("Please enter title")
-    .min(50, "Title must be least 50 characters"),
-  slug: yup.string().required("Please enter slug"),
-});
+// const schema = yup.object({
+//   title: yup
+//     .string()
+//     .required("Please enter title")
+//     .min(50, "Title must be least 50 characters"),
+//   slug: yup.string().required("Please enter slug"),
+// });
 const UserUpdatePost = () => {
+  const { userInfo } = useAuth();
   const { t } = useTranslation();
   const [params] = useSearchParams();
   const postId = params.get("id");
@@ -92,87 +141,134 @@ const UserUpdatePost = () => {
     reset,
     formState: { isSubmitting, errors },
   } = useForm({
-    resolver: yupResolver(schema),
+    // resolver: yupResolver(schema),
   });
-  const watchStatus = watch("status");
-  const watchHot = watch("hot");
-  const [category, setCategory] = useState([]);
+  const [category, setCategory] = useState("");
   const [categoryId, setCategoryId] = useState("");
   const [selectCategory, setSelectCategory] = useState("");
   const imageUrl = getValues("image");
-  const imageName = getValues("image_name");
+  const [title, setTitle] = useState("");
+  const [titleEN, setTitleEN] = useState("");
+  const [slug, setSlug] = useState("");
+  const [status, setStatus] = useState("");
+  const [hot, setHot] = useState("");
+  const [images, setImages] = useState("");
   const [content, setContent] = useState("");
+  const [contentEN, setContentEN] = useState("");
+  const [showContentEn, setShowContentEN] = useState(false);
+
   useEffect(() => {
     async function getData() {
-      const colRef = doc(db, "posts", postId);
-      const singleDoc = await getDoc(colRef);
-      //Reset dữ liệu các ô input về dữ liệu vừa mới lấy (singleDoc)
-      reset(singleDoc.data());
-      setSelectCategory(singleDoc.data()?.category);
-      setCategoryId(singleDoc.data()?.category?.id);
-      setContent(singleDoc.data()?.content || "");
+      axios
+        .get(baseUrl.getPostById + postId)
+        .then((result) => {
+          setTitle(result.data.title);
+          setTitleEN(result?.data.titleEN);
+          setSlug(result.data.slug);
+          setStatus(result.data.status);
+          setHot(result.data.hot);
+          setImages(result.data.image);
+          setSelectCategory(result.data.category);
+          setContent(result.data.content);
+          setContentEN(result?.data.contentEN);
+          // setCategoryId(result.data.category?.id);
+        })
+        .catch((err) => console.log(err));
     }
     getData();
   }, [postId, reset]);
+
   useEffect(() => {
     async function getCategory() {
-      const colRef = doc(db, "category", categoryId);
-      const singleDoc = await getDoc(colRef);
-      setSelectCategory(singleDoc?.data());
+      axios
+        .get(baseUrl.getCategoryById + categoryId)
+        .then((result) => {
+          setSelectCategory(result.data);
+        })
+        .catch((err) => console.log(err));
     }
     getCategory();
   }, [categoryId]);
 
   const { handleDeleteImage, handleSelectImage, progress, image, setImage } =
-    useHandleImage(setValue, getValues, imageName, deleteImagePost);
-  async function deleteImagePost() {
-    const colRef = doc(db, "posts", postId);
-    await updateDoc(colRef, {
-      image: "",
-    });
-  }
+    useHandleImage(setValue, getValues);
+
   useEffect(() => {
     setImage(imageUrl);
   }, [imageUrl, setImage]);
+
   useEffect(() => {
-    async function getData() {
-      const colRef = collection(db, "category");
-      const q = query(colRef, where("status", "==", 1));
-      const querySnapshot = await getDocs(q);
-      let result = [];
-      querySnapshot.forEach((doc) => {
-        result.push({
-          id: doc.id,
-          ...doc.data(),
-        });
-      });
-      setCategory(result);
-    }
-    getData();
-  }, []);
+    setImages(image);
+  }, [image]);
+
+  const { category: categoryList } = useGetCategory();
+  // useEffect(() => {
+  //   async function getData() {
+  //     await axios
+  //       .get(baseUrl.getCategory)
+  //       .then((result) => setCategoryList(result.data))
+  //       .catch((err) => console.log(err));
+  //   }
+  //   getData();
+  // }, []);
+
   const handleOnClick = async (item) => {
-    const colRef = doc(db, "category", item.id);
-    const docData = await getDoc(colRef);
-    setValue("category", {
-      id: docData.id,
-      slug: docData.data()?.slug,
+    setCategory({
+      id: item._id,
+      name: item.name,
+      slug: item.slug,
     });
     setSelectCategory(item);
   };
-
   const handleUpdatePost = async (values) => {
-    const colRef = doc(db, "posts", postId);
-    values.slug = slugify(values.slug || values.title, { lower: true });
-    values.status = Number(values.status);
-    await updateDoc(colRef, {
-      ...values,
-      image: image,
-      content,
-    });
+    axios
+      .put(baseUrl.updatePost + postId, {
+        title,
+        titleEN,
+        slug: slugify(slug || title, { lower: true }),
+        status,
+        hot,
+        image,
+        content,
+        contentEN,
+        category: category || selectCategory,
+      })
+      .then((result) => console.log(result))
+      .catch((err) => console.log(err));
     toast.success(`${t("toastUpdatePost")}`);
     navigate("/user-post");
   };
   const modules = useMemo(
+    () => ({
+      toolbar: [
+        ["bold", "italic", "underline", "strike"],
+        ["blockquote"],
+        [{ header: 1 }, { header: 2 }], // custom button valconsole.logues
+        [{ list: "ordered" }, { list: "bullet" }],
+        [{ header: [1, 2, 3, 4, 5, 6, false] }],
+        ["link", "image"],
+      ],
+      imageUploader: {
+        upload: async (file) => {
+          console.log("upload: ~ file", file);
+          const bodyFormData = new FormData();
+          console.log("upload: ~ bodyFormData", bodyFormData);
+          bodyFormData.append("image", file);
+          const response = await axios({
+            method: "post",
+            url: "https://api.imgbb.com/1/upload?key=2b50a1f27ed98d03cc9f0e726b8fc2ab",
+            data: bodyFormData,
+            headers: {
+              "Content-Type": "multipart/form-data",
+            },
+          });
+          return response.data.data.url;
+        },
+      },
+    }),
+    []
+  );
+  const modulesEN = useMemo(
     () => ({
       toolbar: [
         ["bold", "italic", "underline", "strike"],
@@ -217,7 +313,7 @@ const UserUpdatePost = () => {
   const renderStatus = (status) => {
     switch (status) {
       case 1:
-        return <p>Approved</p>;
+        return <p>Active</p>;
       case 2:
         return <p p>Pending</p>;
       case 3:
@@ -229,7 +325,7 @@ const UserUpdatePost = () => {
   if (!postId) return null;
   return (
     <Layout>
-      <PostUpdateStyles>
+      <PostUpdateStyles showContentEn={showContentEn}>
         <div className="container">
           <DashboardHeading
             title={t("updatePost")}
@@ -243,25 +339,46 @@ const UserUpdatePost = () => {
                   control={control}
                   placeholder={t("titlePlace")}
                   name="title"
+                  value={title}
+                  onChange={(e) => setTitle(e.target.value)}
                 ></Input>
               </Field>
+              <Field>
+                <Label htmlFor="title">{t("title")} EN</Label>
+                <Input
+                  control={control}
+                  placeholder={`${t("titlePlace")} EN`}
+                  name="titleEN"
+                  value={titleEN}
+                  onChange={(e) => setTitleEN(e.target.value)}
+                ></Input>
+              </Field>
+            </div>
+            <div className="update-post">
+              {/* <Field>
+                <Label>{t("status")}</Label>
+                <div className="status">
+                  <Radio
+                    name="status"
+                    control={control}
+                    checked={Number(status) === postValue.Active}
+                    // onClick={() => setValue("status", "active")}
+                    onChange={(e) => setStatus(e.target.value)}
+                    value={postValue.Active}
+                  >
+                    {renderStatus(Number(status))}
+                  </Radio>
+                </div>
+              </Field> */}
               <Field>
                 <Label htmlFor="slug">{t("slug")}</Label>
                 <Input
                   control={control}
                   placeholder={t("slugPlace")}
                   name="slug"
+                  value={slug}
+                  onChange={(e) => setSlug(e.target.value)}
                 ></Input>
-              </Field>
-            </div>
-            <div className="update-post">
-              <Field>
-                <Label>{t("status")}</Label>
-                <div className="status">
-                  <Radio name="status" control={control} checked={true}>
-                    {renderStatus(Number(watchStatus))}
-                  </Radio>
-                </div>
               </Field>
               <Field>
                 <Label>{t("category")}</Label>
@@ -272,9 +389,9 @@ const UserUpdatePost = () => {
                     }`}
                   ></DropDown.Select>
                   <DropDown.List>
-                    {category?.map((item) => (
+                    {categoryList?.map((item) => (
                       <DropDown.Options
-                        key={item.id}
+                        key={item._id}
                         onClick={() => handleOnClick(item)}
                       >
                         {item.name}
@@ -291,23 +408,30 @@ const UserUpdatePost = () => {
                   name="image"
                   post={true}
                   className="image-select"
-                  image={image}
+                  image={images}
                   handleDeleteImage={handleDeleteImage}
                   progress={progress}
                   onChange={handleSelectImage}
                 ></ImageUpload>
               </Field>
-              <Field>
+              {/* <Field>
                 <Label>{t("feature")}</Label>
-                <Toggle
-                  on={watchHot === true}
-                  onClick={() => setValue("hot", !watchHot)}
-                ></Toggle>
-              </Field>
+                <Toggle on={hot === true} onClick={() => setHot(!hot)}></Toggle>
+              </Field> */}
             </div>
             <div className="content entry-content">
-              <Label>{t("content")}</Label>
-              <div>
+              <div className="title-content">
+                <Label>{t("content")}</Label>
+                <div className="show-content">
+                  <div className="vn" onClick={() => setShowContentEN(false)}>
+                    VN
+                  </div>
+                  <div className="en" onClick={() => setShowContentEN(true)}>
+                    EN
+                  </div>
+                </div>
+              </div>
+              <div className="content-vn">
                 <ReactQuill
                   modules={modules}
                   theme="snow"
@@ -315,7 +439,16 @@ const UserUpdatePost = () => {
                   onChange={setContent}
                 />
               </div>
+              <div className="content-en">
+                <ReactQuill
+                  modules={modulesEN}
+                  theme="snow"
+                  value={contentEN}
+                  onChange={setContentEN}
+                />
+              </div>
             </div>
+
             <Button
               type="submit"
               className="button-update"

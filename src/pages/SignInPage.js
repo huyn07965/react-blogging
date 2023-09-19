@@ -6,8 +6,6 @@ import { yupResolver } from "@hookform/resolvers/yup";
 import { toast } from "react-toastify";
 import { Link, NavLink, useNavigate } from "react-router-dom";
 import { useAuth } from "../contexts/auth-context";
-import { signInWithEmailAndPassword } from "firebase/auth";
-import { auth } from "../firebase-app/firebase-config";
 import {
   Button,
   Field,
@@ -17,6 +15,8 @@ import {
 } from "../components";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
+import axios from "axios";
+import { baseUrl } from "../utils/constants";
 
 const SignInPageStyles = styled.div`
   min-height: 100vh;
@@ -64,6 +64,7 @@ const SignInPageStyles = styled.div`
   }
   .have-account {
     margin-bottom: 25px;
+    padding-left: 5px;
     a {
       display: inline-block;
       font-weight: 500;
@@ -88,16 +89,16 @@ const SignInPageStyles = styled.div`
     }
   }
 `;
-const schema = yup.object({
-  email: yup
-    .string()
-    .required("Please enter your email address")
-    .email("Please enter valid email address"),
-  password: yup
-    .string()
-    .required("Please enter your password")
-    .min(8, "Your password must be least 8 characters"),
-});
+// const schema = yup.object({
+//   email: yup
+//     .string()
+//     .required("Please enter your email address")
+//     .email("Please enter valid email address"),
+//   password: yup
+//     .string()
+//     .required("Please enter your password")
+//     .min(8, "Your password must be least 8 characters"),
+// });
 const SignInPage = () => {
   const {
     handleSubmit,
@@ -105,10 +106,10 @@ const SignInPage = () => {
     formState: { isSubmitting, errors },
   } = useForm({
     mode: "onChange",
-    resolver: yupResolver(schema),
+    // resolver: yupResolver(schema),
   });
   const { t } = useTranslation();
-  const { userInfo } = useAuth();
+  const { userInfo, signIn, setSignIn } = useAuth();
   const navigate = useNavigate();
   const [error, setError] = useState(false);
   useEffect(() => {
@@ -116,16 +117,39 @@ const SignInPage = () => {
     if (userInfo?.email) navigate("/");
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
-  const handleSignIn = async (values) => {
-    await signInWithEmailAndPassword(auth, values.email, values.password)
-      .then(() => {
-        navigate("/");
-        toast.success(`${t("signUpSuccess")}`);
-      })
-      .catch((error) => {
-        setError(true);
-      });
+  const [password, setPassword] = useState("");
+  const handlePassChange = (value) => {
+    setPassword(value);
   };
+  const handleSignIn = async (values) => {
+    // e.preventDefault();
+    if (values.email) {
+      const email = values.email;
+      try {
+        const { data: res } = await axios.post(baseUrl.signIn, {
+          email,
+          password,
+        });
+        localStorage.setItem("token", res.data);
+        setSignIn(!signIn);
+        navigate("/");
+        toast.success(`${t("signInSuccess")}`);
+      } catch (error) {
+        // if (
+        //   error.response &&
+        //   error.response.status >= 400 &&
+        //   error.response.status <= 500
+        // ) {
+        //   setError(true);
+        // }
+        toast.error(`${t("signInErr")}`);
+        setError(true);
+      }
+    } else {
+      toast.error(`${t("toastSignIn")}`);
+    }
+  };
+
   useEffect(() => {
     const arrErros = Object.values(errors);
     if (arrErros.length > 0) {
@@ -167,16 +191,19 @@ const SignInPage = () => {
             </Field>
             <Field>
               <Label htmlFor="password">{t("pass")}</Label>
-              <InputPasswordToogle control={control}></InputPasswordToogle>
-              {error && (
-                <h3 className="error">
-                  Email hoặc mật khẩu không đúng! Vui lòng nhập lại
-                </h3>
-              )}
+              <InputPasswordToogle
+                control={control}
+                onChange={handlePassChange}
+              ></InputPasswordToogle>
+              {error && <h3 className="error">{t("signInErrValid")}</h3>}
             </Field>
             <div className="have-account">
               {t("titleNotAccount")}{" "}
               <NavLink to="/sign-up">{t("titleRegister")}</NavLink>
+            </div>
+            <div className="have-account">
+              {t("titleForgetPass")}{" "}
+              <NavLink to="/reset-pass">{t("titleResetPass")}</NavLink>
             </div>
             <Button
               type="submit"

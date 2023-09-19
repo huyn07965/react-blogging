@@ -5,8 +5,10 @@ import DashBoardPage from "./DashBoardPage";
 import DetailPage from "./DetailPage";
 import HomePage from "./HomePage";
 import NotFoundPage from "./NotFoundPage";
+import ResetPasswordPage from "./ResetPasswordPage";
 import SearchPage from "./SearchPage";
 import SignInPage from "./SignInPage";
+import SignUpAuthor from "./SignUpAuthor";
 import SignUpPage from "./SignUpPage";
 import UserPage from "./UserPage";
 import WatchLater from "./WatchLater";
@@ -24,4 +26,6 @@ export {
   BlogPage,
   SearchPage,
   WatchLater,
+  ResetPasswordPage,
+  SignUpAuthor,
 };

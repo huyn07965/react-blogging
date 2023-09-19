@@ -10,22 +10,23 @@ import { theme } from "./utils/constants";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { Provider } from "react-redux";
-import store from "./store/configureStore";
+
 import "./i18next";
+import { SkeletonTheme } from "react-loading-skeleton";
 const container = document.getElementById("root");
 const root = createRoot(container);
 
 root.render(
   <React.StrictMode>
-    <Provider store={store}>
-      <ThemeProvider theme={theme}>
-        <GlobalStyles></GlobalStyles>
-        <BrowserRouter>
+    <ThemeProvider theme={theme}>
+      <GlobalStyles></GlobalStyles>
+      <BrowserRouter>
+        <SkeletonTheme color="#009900" highlightColor="#FF3300">
           <App />
-          <ToastContainer></ToastContainer>
-        </BrowserRouter>
-      </ThemeProvider>
-    </Provider>
+        </SkeletonTheme>
+        <ToastContainer></ToastContainer>
+      </BrowserRouter>
+    </ThemeProvider>
   </React.StrictMode>
 );
 

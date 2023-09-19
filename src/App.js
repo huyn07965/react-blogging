@@ -8,8 +8,10 @@ import {
   DetailPage,
   HomePage,
   NotFoundPage,
+  ResetPasswordPage,
   SearchPage,
   SignInPage,
+  SignUpAuthor,
   SignUpPage,
   UserPage,
   WatchLater,
@@ -31,8 +33,15 @@ import {
   UserPost,
   UserUpdatePost,
   UserUpdate,
+  ReportManage,
+  ViewReport,
+  EditReport,
+  GeneralManage,
+  Rule,
+  ChangeImageBanner,
 } from "./module";
 import Translate from "./components/translate/Translate";
+import { Chart } from "./components";
 
 function App() {
   return (
@@ -40,6 +49,7 @@ function App() {
       <AuthProvider>
         <Routes>
           <Route path="/" element={<HomePage></HomePage>}></Route>
+          <Route path="/chart" element={<Chart></Chart>}></Route>
           <Route path="/sign-up" element={<SignUpPage></SignUpPage>}></Route>
           <Route path="/sign-in" element={<SignInPage></SignInPage>}></Route>
           <Route path="/userInfo" element={<UserInfo></UserInfo>}></Route>
@@ -54,6 +64,10 @@ function App() {
           ></Route>
           <Route path="/edit-user" element={<UserEdit></UserEdit>}></Route>
           <Route path="/blog" element={<BlogPage></BlogPage>}></Route>
+          <Route
+            path="/reset-pass"
+            element={<ResetPasswordPage></ResetPasswordPage>}
+          ></Route>
           <Route path="/search" element={<SearchPage></SearchPage>}></Route>
           <Route path="/contact" element={<ContactPage></ContactPage>}></Route>
           <Route path="/translate" element={<Translate></Translate>}></Route>
@@ -62,6 +76,10 @@ function App() {
             element={<WatchLater></WatchLater>}
           ></Route>
           <Route path="/post/:slug" element={<DetailPage></DetailPage>}></Route>
+          <Route
+            path="/sign-up-author"
+            element={<SignUpAuthor></SignUpAuthor>}
+          ></Route>
           <Route
             path="/category/:slug"
             element={<CategoryPage></CategoryPage>}
@@ -112,6 +130,27 @@ function App() {
               path="/manage/update-contact"
               element={<ContactUpdate></ContactUpdate>}
             ></Route>
+            <Route
+              path="/manage/report"
+              element={<ReportManage></ReportManage>}
+            ></Route>
+            <Route
+              path="/manage/view-report"
+              element={<ViewReport></ViewReport>}
+            ></Route>
+            <Route
+              path="/manage/edit-report"
+              element={<EditReport></EditReport>}
+            ></Route>
+            <Route
+              path="/manage/general"
+              element={<GeneralManage></GeneralManage>}
+            ></Route>
+            <Route
+              path="/manage/change-image"
+              element={<ChangeImageBanner></ChangeImageBanner>}
+            ></Route>
+            <Route path="/manage/rule" element={<Rule></Rule>}></Route>
           </Route>
           <Route path="*" element={<NotFoundPage></NotFoundPage>}></Route>
         </Routes>

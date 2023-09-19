@@ -6,27 +6,20 @@ import {
   ActionEdit,
   ActionView,
   Button,
+  IconDelete,
   LabelStatus,
   Table,
 } from "../../components";
 import styled from "styled-components";
-import {
-  collection,
-  deleteDoc,
-  doc,
-  getDocs,
-  limit,
-  onSnapshot,
-  query,
-  startAfter,
-  where,
-} from "firebase/firestore";
-import { db } from "../../firebase-app/firebase-config";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import Swal from "sweetalert2";
 import { debounce } from "lodash";
 import { useAuth } from "../../contexts/auth-context";
-import { roleStatus } from "../../utils/constants";
+import { baseUrl, roleStatus } from "../../utils/constants";
+import axios from "axios";
+import usePagination from "../../hooks/usePagination";
+import useSearchUser from "../../hooks/useSearchUser";
+import useViewport from "../../hooks/useViewPort";
 
 const UserManageStyles = styled.div`
   width: 100%;
@@ -38,19 +31,75 @@ const UserManageStyles = styled.div`
   }
   .search-post {
     width: 100%;
-    max-width: 600px;
     display: flex;
     flex-wrap: wrap;
-    justify-content: flex-end;
+    justify-content: space-between;
     align-items: center;
     gap: 12px;
+    padding: 15px 0;
   }
   .search {
-    max-width: 300px;
-    padding: 16px;
+    width: 40%;
+    padding: 10px 20px;
     border: 1px solid ${(props) => props.theme.greyLight};
-    border-radius: 5px;
+    border-radius: 8px;
   }
+  .search-body {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 10px;
+  }
+  .background-icon {
+    position: relative;
+    padding: 7px;
+    border-radius: 5px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-image: linear-gradient(
+      to right bottom,
+      ${(props) => props.theme.primary},
+      ${(props) => props.theme.secondary}
+    );
+    color: white;
+    cursor: pointer;
+  }
+  .icon-search {
+    width: 25px;
+    height: 25px;
+    color: white;
+  }
+  .page {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .status {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 15px;
+    padding: 10px 0 20px 0;
+    cursor: pointer;
+  }
+  .all-text {
+    font-weight: 500;
+    background-image: linear-gradient(
+      to right bottom,
+      ${(props) => props.theme.primary},
+      ${(props) => props.theme.secondary}
+    );
+    color: white;
+    cursor: pointer;
+    padding: 8px 20px;
+    border-radius: 5px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
   .header-button {
     padding: 10px;
     max-width: 230px;
@@ -85,69 +134,99 @@ const UserManageStyles = styled.div`
     color: ${(props) => props.theme.grey6B};
     font-size: 14px;
   }
+  .pagination {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    list-style: none;
+    padding: 30px 0 20px 0;
+    gap: 10px;
+  }
+  .page-item {
+    padding: 7px 15px;
+    border-radius: 3px;
+    font-weight: 500;
+  }
+  .active {
+    background-color: ${(props) => props.theme.primary};
+    color: white;
+  }
+  .page-link {
+    padding: 10px;
+    width: 40px;
+    height: 40px;
+    background-color: ${(props) => props.theme.primary};
+    color: white;
+    border-radius: 3px;
+  }
 `;
 
 const UserManage = () => {
   const { userInfo } = useAuth();
   const { t } = useTranslation();
-  const [user, setUser] = useState();
+  const [user, setUser] = useState([]);
   const [search, setSearch] = useState("");
-  const [lastDoc, setLastDoc] = useState();
-  const [total, setTotal] = useState();
   const navigate = useNavigate();
-  const handleLoadMore = async () => {
-    const nextRef = query(
-      collection(db, "users"),
-      startAfter(lastDoc || 0),
-      limit(5)
-    );
-    onSnapshot(nextRef, (snapshot) => {
-      let result = [];
-      snapshot.forEach((doc) => {
-        result.push({
-          id: doc.id,
-          ...doc.data(),
-        });
-      });
-      setUser([...user, ...result]);
-    });
-    const documentSnapshots = await getDocs(nextRef);
-    const lastVisible =
-      documentSnapshots.docs[documentSnapshots.docs.length - 1];
-    setLastDoc(lastVisible);
-  };
+  const [reload, setReload] = useState(false);
+  const [typeFilter, setTypeFilter] = useState(0);
+  const viewPort = useViewport();
+  const isMobile = viewPort.width <= 600;
+
   useEffect(() => {
     async function fetchData() {
-      const colRef = collection(db, "users");
-      const newSearch = search
-        ? query(
-            colRef,
-            where("fullName", ">=", search),
-            where("fullName", "<=", search + "utf8")
-          )
-        : query(colRef, limit(5));
-      const documentSnapshots = await getDocs(newSearch);
-      const lastVisible =
-        documentSnapshots.docs[documentSnapshots.docs.length - 1];
-      onSnapshot(colRef, (snapshot) => {
-        setTotal(snapshot.size);
-      });
-      onSnapshot(newSearch, (snapshot) => {
-        let result = [];
-        snapshot.forEach((doc) => {
-          result.push({
-            id: doc.id,
-            ...doc.data(),
-          });
-        });
-        setUser(result);
-      });
-      setLastDoc(lastVisible);
+      await axios
+        .get(baseUrl.getUser)
+        .then((result) => setUser(result.data))
+        .catch((err) => console.log(err));
     }
     fetchData();
-  }, [search]);
-  const handleDelete = async (docId) => {
-    const colRef = doc(db, "users", docId);
+  }, [reload]);
+
+  const handleFilterData = (type) => {
+    switch (type) {
+      case 0:
+        async function fetchDataAll() {
+          await axios
+            .get(baseUrl.getUser)
+            .then((result) => setUser(result.data))
+            .catch((err) => console.log(err));
+        }
+        fetchDataAll();
+        break;
+      case 1:
+        async function fetchDataActive() {
+          await axios
+            .get(baseUrl.getUserFilter + 1)
+            .then((result) => setUser(result.data))
+            .catch((err) => console.log(err));
+        }
+        fetchDataActive();
+        break;
+      case 2:
+        async function fetchDataPending() {
+          await axios
+            .get(baseUrl.getUserFilter + 2)
+            .then((result) => setUser(result.data))
+            .catch((err) => console.log(err));
+        }
+        fetchDataPending();
+        break;
+      case 3:
+        async function fetchDataReject() {
+          await axios
+            .get(baseUrl.getUserFilter + 3)
+            .then((result) => setUser(result.data))
+            .catch((err) => console.log(err));
+        }
+        fetchDataReject();
+        break;
+
+      default:
+        break;
+    }
+  };
+
+  const handleDelete = async (id) => {
     Swal.fire({
       title: "Are you sure?",
       text: "You won't be able to revert this!",
@@ -158,8 +237,34 @@ const UserManage = () => {
       confirmButtonText: "Yes, delete it!",
     }).then(async (result) => {
       if (result.isConfirmed) {
-        await deleteDoc(colRef);
-        Swal.fire("Deleted!", "Your file has been deleted.", "success");
+        axios
+          .delete(baseUrl.deleteUser + id)
+          .then((result) => {
+            Swal.fire("Deleted!", "User has been deleted.", "success");
+            setReload(!reload);
+          })
+          .catch((err) => console.log(err));
+      }
+    });
+  };
+  const handleDeleteAllReject = () => {
+    Swal.fire({
+      title: "Are you sure?",
+      text: "You won't be able to revert this!",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#3085d6",
+      cancelButtonColor: "#d33",
+      confirmButtonText: "Yes, delete it!",
+    }).then(async (result) => {
+      if (result.isConfirmed) {
+        axios
+          .delete(baseUrl.deleteUserReject)
+          .then((result) => {
+            Swal.fire("Deleted!", "User reject has been deleted.", "success");
+            setReload(!reload);
+          })
+          .catch((err) => console.log(err));
       }
     });
   };
@@ -180,35 +285,84 @@ const UserManage = () => {
       case 1:
         return "Admin";
       case 2:
-        return "Moderator";
+        return "Author";
       case 3:
         return "User";
       default:
         break;
     }
   };
-  const handleSearch = debounce((e) => {
+  const handleSearchText = debounce((e) => {
     setSearch(e.target.value);
   }, 500);
+
+  const { dataSearch } = useSearchUser(user, search);
+
+  const handleSearch = () => {
+    setUser(dataSearch);
+  };
+
+  const { prePage, changePage, nextPage, record, numbers, currentPage } =
+    usePagination(user, 10);
+
   useEffect(() => {
     document.title = "User Manage Page";
   });
   if (userInfo?.role !== roleStatus.Admin) return null;
   return (
     <UserManageStyles>
-      <DashboardHeading title={t("user")} desc={t("manageUser")}>
-        <div className="search-post">
+      <DashboardHeading
+        title={t("user")}
+        desc={t("manageUser")}
+      ></DashboardHeading>
+      <div className="search-post">
+        <Button to="/manage/add-user" className="header-button" height="42px">
+          {t("addNew")}
+        </Button>
+        <div className="search-body">
           <input
             type="text"
             className="search"
             placeholder={`${t("searchUser")} ...`}
-            onChange={handleSearch}
+            onChange={handleSearchText}
           />
-          <Button to="/manage/add-user" className="header-button" height="52px">
-            {t("addNew")}
-          </Button>
+          <div onClick={handleSearch} className="background-icon">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 24 24"
+              strokeWidth="2.2"
+              stroke="currentColor"
+              className="icon-search"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z"
+              />
+            </svg>
+          </div>
         </div>
-      </DashboardHeading>
+      </div>
+      <div className="page">
+        <div className="status">
+          <div onClick={() => handleFilterData(1)}>
+            <LabelStatus type="success">Active</LabelStatus>
+          </div>
+          <div onClick={() => handleFilterData(2)}>
+            <LabelStatus type="warning">Pending</LabelStatus>
+          </div>
+          <div onClick={() => handleFilterData(3)}>
+            <LabelStatus type="danger">Reject</LabelStatus>
+          </div>
+          <div className="all-text" onClick={() => handleFilterData(0)}>
+            {t("all")}
+          </div>
+        </div>
+        <div className="all-text" onClick={handleDeleteAllReject}>
+          {isMobile ? <IconDelete></IconDelete> : `${t("deleteAllReject")}`}
+        </div>
+      </div>
       <Table>
         <thead>
           <tr>
@@ -222,9 +376,9 @@ const UserManage = () => {
           </tr>
         </thead>
         <tbody>
-          {user?.map((user) => (
-            <tr key={user.id}>
-              <td title={user.id}>{user.id.slice(0, 5) + "..."}</td>
+          {record?.map((user) => (
+            <tr key={user._id}>
+              <td title={user._id}>{user._id.slice(0, 5) + "..."}</td>
               <td className="td-info">
                 <div className="info">
                   <img src={user.avatar} alt="" className="image" />
@@ -245,15 +399,15 @@ const UserManage = () => {
               <td>
                 <div className="icon-manage">
                   <ActionView
-                    onClick={() => navigate(`/userinfo?id=${user.id}`)}
+                    onClick={() => navigate(`/user/${user._id}`)}
                   ></ActionView>
                   <ActionEdit
                     onClick={() =>
-                      navigate(`/manage/update-user?id=${user.id}`)
+                      navigate(`/manage/update-user?id=${user._id}`)
                     }
                   ></ActionEdit>
                   <ActionDelete
-                    onClick={() => handleDelete(user.id)}
+                    onClick={() => handleDelete(user._id)}
                   ></ActionDelete>
                 </div>
               </td>
@@ -261,11 +415,54 @@ const UserManage = () => {
           ))}
         </tbody>
       </Table>
-      {total > user?.length && (
-        <Button className="button" onClick={handleLoadMore}>
-          Load More
-        </Button>
-      )}
+      <div>
+        <ul className="pagination">
+          <li>
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 24 24"
+              strokeWidth="2.5"
+              stroke="currentColor"
+              className="page-link"
+              onClick={prePage}
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M18.75 19.5l-7.5-7.5 7.5-7.5m-6 15L5.25 12l7.5-7.5"
+              />
+            </svg>
+          </li>
+          {numbers?.map((number, i) => (
+            <li
+              key={number}
+              className={`page-item ${currentPage === number ? "active" : ""}`}
+            >
+              <Link href="#" onClick={() => changePage(number)}>
+                {number}
+              </Link>
+            </li>
+          ))}
+          <li>
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 24 24"
+              strokeWidth="2.5"
+              stroke="currentColor"
+              className="page-link"
+              onClick={nextPage}
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M11.25 4.5l7.5 7.5-7.5 7.5m-6-15l7.5 7.5-7.5 7.5"
+              />
+            </svg>
+          </li>
+        </ul>
+      </div>
     </UserManageStyles>
   );
 };

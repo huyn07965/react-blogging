@@ -1,18 +1,18 @@
-import { addDoc, collection, serverTimestamp } from "firebase/firestore";
 import React from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "react-toastify";
 import slugify from "slugify";
 import styled from "styled-components";
 import { Button, Field, Input, Label, Radio } from "../../components";
-import { db } from "../../firebase-app/firebase-config";
-import { categoryValue, roleStatus } from "../../utils/constants";
+import { baseUrl, categoryValue, roleStatus } from "../../utils/constants";
 import DashboardHeading from "../dashboard/DashboardHeading";
 import { useAuth } from "../../contexts/auth-context";
 import { useEffect } from "react";
 import * as yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { useTranslation } from "react-i18next";
+import { values } from "lodash";
+import axios from "axios";
 
 const CategoryAddNewStyles = styled.div`
   .category-layout {
@@ -55,9 +55,10 @@ const CategoryAddNew = () => {
     resolver: yupResolver(schema),
     defaultValues: {
       name: "",
+      nameEN: "",
       slug: "",
       status: 1,
-      createdAt: new Date(),
+      // createdAt: new Date(),
     },
   });
   const watchStatus = watch("status");
@@ -67,18 +68,23 @@ const CategoryAddNew = () => {
     const newValues = { ...values };
     newValues.slug = slugify(values.slug || values.name, { lower: true });
     newValues.status = Number(newValues.status);
-    const colRef = collection(db, "category");
     try {
-      await addDoc(colRef, {
-        ...newValues,
-        createdAt: serverTimestamp(),
-      });
+      axios
+        // .post("http://localhost:3001/createCategory", newValues)
+        .post(baseUrl.creteCategory, newValues)
+        .then((result) => console.log(result))
+        .catch((err) => console.log(err));
+      // await addDoc(colRef, {
+      //   ...newValues,
+      //   createdAt: serverTimestamp(),
+      // });
       toast.success(`${t("toastCreateCategory")}`);
     } catch (erorr) {
       toast.success(`${t("toastCreateCategory")}`);
     } finally {
       reset({
         name: "",
+        nameEN: "",
         slug: "",
         status: 1,
       });
@@ -96,6 +102,7 @@ const CategoryAddNew = () => {
   useEffect(() => {
     document.title = "Category Add Page";
   });
+
   if (userInfo?.role !== roleStatus.Admin) return null;
   return (
     <CategoryAddNewStyles>
@@ -114,6 +121,16 @@ const CategoryAddNew = () => {
             ></Input>
           </Field>
           <Field>
+            <Label htmlFor="name">{t("name")} EN</Label>
+            <Input
+              control={control}
+              name="nameEN"
+              placeholder={`${t("categoryPlace")} EN`}
+            ></Input>
+          </Field>
+        </div>
+        <div className="category-layout">
+          <Field>
             <Label htmlFor="slug">{t("slug")}</Label>
             <Input
               control={control}
@@ -121,8 +138,6 @@ const CategoryAddNew = () => {
               placeholder={t("slugPlace")}
             ></Input>
           </Field>
-        </div>
-        <div className="category-layout">
           <Field>
             <Label>{t("status")}</Label>
             <div className="radio-category">

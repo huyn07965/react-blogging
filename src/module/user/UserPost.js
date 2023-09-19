@@ -1,14 +1,19 @@
 import React, { useState } from "react";
 import styled from "styled-components";
-import { LabelStatus, Layout, PostList, Table } from "../../components";
+import { Layout, PostList, Table } from "../../components";
 import { useEffect } from "react";
 import { debounce } from "lodash";
 import { useAuth } from "../../contexts/auth-context";
-import useGetPost from "../../hooks/useGetPost";
 import DashboardHeading from "../dashboard/DashboardHeading";
 import { useTranslation } from "react-i18next";
+import useGetPostById from "../../hooks/useGetPostById";
+import usePagination from "../../hooks/usePagination";
+import { Link } from "react-router-dom";
 
 const PostManageStyles = styled.div`
+  .container {
+    padding: 10px 0 40px 0;
+  }
   .search-post {
     width: 100%;
     max-width: 600px;
@@ -67,13 +72,41 @@ const PostManageStyles = styled.div`
     gap: 12px;
     color: ${(props) => props.theme.greyDark};
   }
+  .pagination {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    list-style: none;
+    padding: 30px 0 20px 0;
+    gap: 10px;
+  }
+  .page-item {
+    padding: 7px 15px;
+    border-radius: 3px;
+    font-weight: 500;
+  }
+  .active {
+    background-color: ${(props) => props.theme.primary};
+    color: white;
+  }
+  .page-link {
+    padding: 10px;
+    width: 40px;
+    height: 40px;
+    background-color: ${(props) => props.theme.primary};
+    color: white;
+    border-radius: 3px;
+  }
 `;
 
 const UserPost = () => {
   const { userInfo } = useAuth();
   const { t } = useTranslation();
   const [search, setSearch] = useState("");
-  const { postList } = useGetPost(userInfo.uid, search);
+  const { postList } = useGetPostById(userInfo?._id, search);
+  const { prePage, changePage, nextPage, record, numbers, currentPage } =
+    usePagination(postList, 10);
+
   const handleSearch = debounce((e) => {
     setSearch(e.target.value);
   }, 500);
@@ -88,14 +121,14 @@ const UserPost = () => {
             title={t("myPost")}
             desc={t("manageMyPost")}
           ></DashboardHeading>
-          <div className="search-post">
+          {/* <div className="search-post">
             <input
               type="text"
               className="search"
               placeholder={`${t("searchPost")} ...`}
               onChange={handleSearch}
             />
-          </div>
+          </div> */}
           <Table>
             <thead>
               <tr>
@@ -108,11 +141,61 @@ const UserPost = () => {
               </tr>
             </thead>
             <tbody>
-              {postList?.map((post) => (
+              {record?.map((post) => (
                 <PostList post={post}></PostList>
               ))}
             </tbody>
           </Table>
+          <div>
+            <ul className="pagination">
+              <li>
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  strokeWidth="2.5"
+                  stroke="currentColor"
+                  className="page-link"
+                  onClick={prePage}
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M18.75 19.5l-7.5-7.5 7.5-7.5m-6 15L5.25 12l7.5-7.5"
+                  />
+                </svg>
+              </li>
+              {numbers?.map((number, i) => (
+                <li
+                  key={number}
+                  className={`page-item ${
+                    currentPage === number ? "active" : ""
+                  }`}
+                >
+                  <Link href="#" onClick={() => changePage(number)}>
+                    {number}
+                  </Link>
+                </li>
+              ))}
+              <li>
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  strokeWidth="2.5"
+                  stroke="currentColor"
+                  className="page-link"
+                  onClick={nextPage}
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M11.25 4.5l7.5 7.5-7.5 7.5m-6-15l7.5 7.5-7.5 7.5"
+                  />
+                </svg>
+              </li>
+            </ul>
+          </div>
         </div>
       </PostManageStyles>
     </Layout>

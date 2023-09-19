@@ -11,6 +11,8 @@ const DashBoardHeaderStyles = styled.div`
   display: flex;
   justify-content: space-between;
   gap: 20px;
+  position: fixed;
+  z-index: 1000;
   .logo {
     margin-left: 10px;
     img {
@@ -22,6 +24,7 @@ const DashBoardHeaderStyles = styled.div`
     max-width: 55px;
     height: 55px;
     border-radius: 100%;
+    cursor: pointer;
   }
   .image {
     width: 100%;

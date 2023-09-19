@@ -1,12 +1,9 @@
 import React from "react";
 import styled from "styled-components";
 import { Heading } from "../../components";
-import { useState } from "react";
-import { useEffect } from "react";
-import { collection, onSnapshot, query, where } from "firebase/firestore";
-import { db } from "../../firebase-app/firebase-config";
 import PostItem from "./PostItem";
 import { useTranslation } from "react-i18next";
+import useGetPostCategory from "../../hooks/useGetPostCategory";
 
 const PostRelatedStyles = styled.div`
   padding-bottom: 20px;
@@ -37,26 +34,11 @@ const PostRelatedStyles = styled.div`
     }
   }
 `;
-const PostRelated = ({ categoryId = "" }) => {
+const PostRelated = ({ slug }) => {
   const { t } = useTranslation();
-  const [post, setPost] = useState([]);
-  useEffect(() => {
-    const docRef = query(
-      collection(db, "posts"),
-      where("category.id", "==", categoryId)
-    );
-    onSnapshot(docRef, (snapshot) => {
-      const result = [];
-      snapshot.forEach((doc) => {
-        result.push({
-          id: doc.id,
-          ...doc.data(),
-        });
-      });
-      setPost(result);
-    });
-  }, [categoryId]);
-  if (!categoryId) return null;
+  const { postList } = useGetPostCategory(slug);
+  const post = postList.slice(0, 4);
+  if (!slug) return null;
   return (
     <PostRelatedStyles>
       <Heading className="heading">{t("related")}</Heading>
@@ -64,7 +46,7 @@ const PostRelated = ({ categoryId = "" }) => {
         <div className="post-item">
           {post?.length > 0 &&
             post?.map((item) => (
-              <PostItem key={item.id} data={item}></PostItem>
+              <PostItem key={item._id} data={item}></PostItem>
             ))}
         </div>
       </div>

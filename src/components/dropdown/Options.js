@@ -40,7 +40,6 @@ const Options = ({
 }) => {
   const [tesst, setTesst] = useState(false);
   const { setShow } = useDropdown();
-
   const handleClick = () => {
     onClick && onClick();
     setShow(false);
@@ -50,8 +49,9 @@ const Options = ({
     <OptionsStyles translate={translate} language={language}>
       <div
         className={`option ${
-          props.children[0] == language ? "activeClass" : ""
+          props?.children[0] == language ? "activeClass" : ""
         }`}
+        // className="option"
         onClick={handleClick}
       >
         {props.children}

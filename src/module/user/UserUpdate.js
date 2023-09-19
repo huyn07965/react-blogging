@@ -1,6 +1,6 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
-import styled from "styled-components";
+import styled, { css } from "styled-components";
 import {
   Button,
   Field,
@@ -13,15 +13,14 @@ import {
 } from "../../components";
 import DashboardHeading from "../dashboard/DashboardHeading";
 import { useNavigate, useSearchParams } from "react-router-dom";
-import { db } from "../../firebase-app/firebase-config";
-import { doc, getDoc, updateDoc } from "firebase/firestore";
 import { toast } from "react-toastify";
-import { roleStatus, userStatus } from "../../utils/constants";
+import { baseUrl, roleStatus, userStatus } from "../../utils/constants";
 import useHandleImage from "../../hooks/useHandleImage";
 import { useAuth } from "../../contexts/auth-context";
 import * as yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { useTranslation } from "react-i18next";
+import axios from "axios";
 
 const UserUpdateStyles = styled.div`
   .user-layout {
@@ -57,6 +56,67 @@ const UserUpdateStyles = styled.div`
     margin: 0 auto;
     max-width: 250px;
   }
+  .title-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+  }
+  .show-content {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    font-size: 16px;
+    gap: 5px;
+  }
+  .vn {
+    cursor: pointer;
+    padding: 5px 20px;
+    display: flex;
+    align-items: center;
+    color: white;
+    background-color: ${(props) => props.theme.primary};
+    border-radius: 8px;
+    ${(props) =>
+      props.showContentEn === true &&
+      css`
+        background-color: ${(props) => props.theme.greyLight};
+        color: black;
+      `}
+  }
+  .en {
+    cursor: pointer;
+    padding: 5px 20px;
+    display: flex;
+    align-items: center;
+    background-color: ${(props) => props.theme.greyLight};
+    border-radius: 8px;
+    ${(props) =>
+      props.showContentEn === true &&
+      css`
+        background-color: ${(props) => props.theme.primary};
+        color: white;
+      `}
+  }
+  .content-vn {
+    display: block;
+    width: 100%;
+    ${(props) =>
+      props.showContentEn === true &&
+      css`
+        display: none;
+      `}
+  }
+  .content-en {
+    display: none;
+    width: 100%;
+    ${(props) =>
+      props.showContentEn === true &&
+      css`
+        display: block;
+      `}
+  }
+
   @media screen and (max-width: 600px) {
     .user-layout {
       width: 100%;
@@ -65,70 +125,105 @@ const UserUpdateStyles = styled.div`
     }
   }
 `;
-const schema = yup.object({
-  fullName: yup.string().required("Please enter full name"),
-  userName: yup
-    .string()
-    .required("Please enter user name")
-    .max(9, "Username must be less than 10 characters"),
-  password: yup
-    .string()
-    .required("Please enter password")
-    .min(8, "Password must be least 8 characters"),
-  slug: yup.string().required("Please enter slug"),
-});
+// const schema = yup.object({
+//   fullName: yup.string().required("Please enter full name"),
+//   userName: yup
+//     .string()
+//     .required("Please enter user name")
+//     .max(9, "Username must be less than 10 characters"),
+//   password: yup
+//     .string()
+//     .required("Please enter password")
+//     .min(8, "Password must be least 8 characters"),
+//   slug: yup.string().required("Please enter slug"),
+// });
 const UserUpdate = () => {
   const { userInfo } = useAuth();
   const { t } = useTranslation();
   const {
     control,
     handleSubmit,
-    watch,
     reset,
     getValues,
     setValue,
     formState: { isSubmitting, errors },
   } = useForm({
-    resolver: yupResolver(schema),
+    // resolver: yupResolver(schema),
   });
   const [params] = useSearchParams();
   const userId = params.get("id");
   const navigate = useNavigate();
-  const watchStatus = watch("status");
-  const watchRole = watch("role");
+  const [avatars, setAvatars] = useState("");
+  const [email, setEmail] = useState("");
+  const [fullName, setFullName] = useState("");
+  const [userName, setUserName] = useState("");
+  const [password, setPassword] = useState("");
+  const [status, setStatus] = useState("");
+  const [hot, setHot] = useState("");
+  const [role, setRole] = useState("");
+  const [slug, setSlug] = useState("");
+  const [description, setDescription] = useState("");
+  const [descriptionEN, setDescriptionEN] = useState("");
   const imageUrl = getValues("avatar");
-  const imageRegex = /%2F(\S+)\?/gm.exec(imageUrl);
-  const imageName = imageRegex?.length > 0 ? imageRegex[1] : "";
+  const [showContentEn, setShowContentEN] = useState(false);
+  // const imageRegex = /%2F(\S+)\?/gm.exec(imageUrl);
+  // const imageName = imageRegex?.length > 0 ? imageRegex[1] : "";
   const { handleDeleteImage, handleSelectImage, progress, image, setImage } =
-    useHandleImage(setValue, getValues, imageName, deleteAvatar);
-  const handleUpdateUser = async (values) => {
-    const colRef = doc(db, "users", userId);
-    await updateDoc(colRef, {
-      ...values,
-      role: Number(values.role),
-      status: Number(values.status),
-      avatar: image,
-    });
-    toast.success(`${t("toastUpdateUser")}`);
-    navigate("/manage/user");
+    useHandleImage(setValue, getValues);
+  const handlePassChange = (value) => {
+    setPassword(value);
   };
-  async function deleteAvatar() {
-    const colRef = doc(db, "users", userId);
-    await updateDoc(colRef, {
-      avatar: "",
-    });
-  }
+  useEffect(() => {
+    setAvatars(image);
+  }, [image]);
+
   useEffect(() => {
     setImage(imageUrl);
   }, [imageUrl, setImage]);
   useEffect(() => {
     async function fetchData() {
-      const colRef = doc(db, "users", userId);
-      const singleDoc = await getDoc(colRef);
-      reset(singleDoc.data());
+      await axios
+        .get(baseUrl.getUserById + userId)
+        .then((result) => {
+          setAvatars(result.data.avatar);
+          setEmail(result.data.email);
+          setFullName(result.data.fullName);
+          setUserName(result.data.userName);
+          setPassword(result.data.password);
+          setStatus(result.data.status);
+          setHot(result.data.hot);
+          setRole(result.data.role);
+          setSlug(result.data.slug);
+          setDescription(result.data.description);
+          setDescriptionEN(result.data.descriptionEN);
+        })
+        .catch((err) => console.log(err));
     }
     fetchData();
   }, [userId, reset]);
+  console.log("data", description);
+
+  const handleUpdateUser = async (values) => {
+    await axios
+      .put(baseUrl.updateUser + userId, {
+        avatars,
+        email,
+        fullName,
+        userName,
+        password,
+        status: Number(status),
+        hot,
+        role: Number(role),
+        slug,
+        description,
+        descriptionEN,
+      })
+      .then((result) => console.log(result))
+      .catch((err) => console.log(err));
+    toast.success(`${t("toastUpdateUser")}`);
+    navigate("/manage/user");
+  };
+
   useEffect(() => {
     const arrErros = Object.values(errors);
     if (arrErros.length > 0) {
@@ -144,7 +239,7 @@ const UserUpdate = () => {
   if (!userId) return null;
   if (userInfo?.role !== roleStatus.Admin) return null;
   return (
-    <UserUpdateStyles>
+    <UserUpdateStyles showContentEn={showContentEn}>
       <DashboardHeading
         title={t("updateUser")}
         desc={`${t("updateUserId")} ${userId}`}
@@ -155,7 +250,7 @@ const UserUpdate = () => {
             className="image-avatar"
             name="image"
             avatar={true}
-            image={image}
+            image={avatars}
             handleDeleteImage={handleDeleteImage}
             progress={progress}
             onChange={handleSelectImage}
@@ -169,6 +264,8 @@ const UserUpdate = () => {
               name="email"
               placeholder={t("emailPlace")}
               disabled={true}
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
             ></Input>
           </Field>
           <Field>
@@ -177,6 +274,8 @@ const UserUpdate = () => {
               control={control}
               name="fullName"
               placeholder={t("fullNamePlace")}
+              value={fullName}
+              onChange={(e) => setFullName(e.target.value)}
             ></Input>
           </Field>
         </div>
@@ -187,11 +286,17 @@ const UserUpdate = () => {
               name="userName"
               control={control}
               placeholder={t("userNamePlace")}
+              value={userName}
+              onChange={(e) => setUserName(e.target.value)}
             ></Input>
           </Field>
           <Field>
             <Label htmlFor="password">{t("pass")}</Label>
-            <InputPasswordToogle control={control}></InputPasswordToogle>
+            <InputPasswordToogle
+              control={control}
+              value={password}
+              onChange={handlePassChange}
+            ></InputPasswordToogle>
           </Field>
         </div>
         <div className="user-layout">
@@ -201,24 +306,27 @@ const UserUpdate = () => {
               <Radio
                 name="status"
                 control={control}
-                checked={Number(watchStatus) === userStatus.Active}
+                checked={Number(status) === userStatus.Active}
                 value={userStatus.Active}
+                onChange={(e) => setStatus(e.target.value)}
               >
                 Active
               </Radio>
               <Radio
                 name="status"
                 control={control}
-                checked={Number(watchStatus) === userStatus.Pending}
+                checked={Number(status) === userStatus.Pending}
                 value={userStatus.Pending}
+                onChange={(e) => setStatus(e.target.value)}
               >
                 Pending
               </Radio>
               <Radio
                 name="status"
                 control={control}
-                checked={Number(watchStatus) === userStatus.Reject}
+                checked={Number(status) === userStatus.Reject}
                 value={userStatus.Reject}
+                onChange={(e) => setStatus(e.target.value)}
               >
                 Reject
               </Radio>
@@ -230,24 +338,27 @@ const UserUpdate = () => {
               <Radio
                 name="role"
                 control={control}
-                checked={Number(watchRole) === roleStatus.Admin}
+                checked={Number(role) === roleStatus.Admin}
                 value={roleStatus.Admin}
+                onChange={(e) => setRole(e.target.value)}
               >
                 Admin
               </Radio>
               <Radio
                 name="role"
                 control={control}
-                checked={Number(watchRole) === roleStatus.Mod}
+                checked={Number(role) === roleStatus.Mod}
                 value={roleStatus.Mod}
+                onChange={(e) => setRole(e.target.value)}
               >
-                Moderator
+                Author
               </Radio>
               <Radio
                 name="role"
                 control={control}
-                checked={Number(watchRole) === roleStatus.User}
+                checked={Number(role) === roleStatus.User}
                 value={roleStatus.User}
+                onChange={(e) => setRole(e.target.value)}
               >
                 User
               </Radio>
@@ -261,11 +372,38 @@ const UserUpdate = () => {
               name="slug"
               control={control}
               placeholder={t("slugPlace")}
+              value={slug}
+              onChange={(e) => setSlug(e.target.value)}
             ></Input>
           </Field>
           <Field>
-            <Label htmlFor="description">{t("description")}</Label>
-            <Textarea name="description" control={control}></Textarea>
+            <div className="title-content">
+              <Label htmlFor="description">{t("description")}</Label>
+              <div className="show-content">
+                <div className="vn" onClick={() => setShowContentEN(false)}>
+                  VN
+                </div>
+                <div className="en" onClick={() => setShowContentEN(true)}>
+                  EN
+                </div>
+              </div>
+            </div>
+            <div className="content-vn">
+              <Textarea
+                name="description"
+                value={description}
+                control={control}
+                onChange={(e) => setDescription(e.target.value)}
+              ></Textarea>
+            </div>
+            <div className="content-en">
+              <Textarea
+                name="descriptionEN"
+                value={descriptionEN}
+                control={control}
+                onChange={(e) => setDescriptionEN(e.target.value)}
+              ></Textarea>
+            </div>
           </Field>
         </div>
         <Button

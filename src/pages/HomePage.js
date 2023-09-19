@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import styled from "styled-components";
 import { Layout } from "../components";
 import { HomeBanner, HomeFeature, HomeNewest } from "../module";
@@ -6,6 +6,9 @@ import { HomeBanner, HomeFeature, HomeNewest } from "../module";
 const HomePageStyles = styled.div``;
 
 const HomePage = () => {
+  useEffect(() => {
+    document.title = "Home Blogging";
+  });
   return (
     <HomePageStyles>
       <Layout className="layout">

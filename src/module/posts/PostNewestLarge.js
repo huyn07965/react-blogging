@@ -2,16 +2,13 @@ import React from "react";
 import styled from "styled-components";
 import PostCategory from "./PostCategory";
 import PostImage from "./PostImage";
-import Postmeta from "./Postmeta";
+import PostMeta from "./PostMeta";
 import PostTitle from "./PostTitle";
-import slugify from "slugify";
 import useViewport from "../../hooks/useViewPort";
 import SavePost from "../../components/savepost/SavePost";
 import { useAuth } from "../../contexts/auth-context";
 import { useNavigate } from "react-router-dom";
 import useSavePost from "../../hooks/useSavePost";
-import useGetCategory from "../../hooks/useGetCategory";
-import useGetUserPost from "../../hooks/useGetUserPost";
 
 const PostNewestLargeStyles = styled.div`
   .images {
@@ -51,14 +48,13 @@ const PostNewestLargeStyles = styled.div`
 `;
 
 const PostNewestLarge = ({ data }) => {
-  const { userInfo } = useAuth();
+  const { userInfo, save, setSave } = useAuth();
+  const itemLng = localStorage.getItem("lng");
   const navigate = useNavigate();
-  const { category } = useGetCategory(data?.category?.id);
-  const { user } = useGetUserPost(data?.user?.id);
-  const { handleWatchLater, savePost } = useSavePost(data?.id);
+  const { handleWatchLater, savePost } = useSavePost(data?._id);
   const viewPort = useViewport();
   const isMobile = viewPort.width <= 1224 && viewPort.width >= 1024;
-  if (!data.id) return null;
+  if (!data._id) return null;
   return (
     <PostNewestLargeStyles>
       <div className="newest">
@@ -69,11 +65,20 @@ const PostNewestLarge = ({ data }) => {
           to={data?.slug}
         ></PostImage>
         <div className="content-newest-top">
-          <PostCategory to={data.category?.slug}>{category?.name}</PostCategory>
+          <PostCategory to={data.category?.slug}>
+            {itemLng === "vn" ? data.category?.name : data.category?.nameEN}
+          </PostCategory>
           <SavePost
-            onClick={userInfo ? handleWatchLater : () => navigate("/sign-in")}
+            onClick={
+              userInfo
+                ? () => {
+                    handleWatchLater();
+                    setSave(!save);
+                  }
+                : () => navigate("/sign-in")
+            }
             savePost={savePost}
-            data={data.id}
+            data={data._id}
           ></SavePost>
         </div>
         {isMobile ? (
@@ -81,25 +86,30 @@ const PostNewestLarge = ({ data }) => {
             className="content-newest-center"
             size="big"
             to={data?.slug}
-            title={data.title}
+            title={itemLng === "vn" ? data?.title : data?.titleEN}
           >
-            {data.title.slice(0, 50) + "..."}
+            {itemLng === "vn"
+              ? data.title?.slice(0, 50) + "..."
+              : data?.titleEN?.slice(0, 50) + "..."}
           </PostTitle>
         ) : (
           <PostTitle
             className="content-newest-center"
             size="big"
             to={data?.slug}
+            title={itemLng === "vn" ? data?.title : data?.titleEN}
           >
-            {data.title}
+            {itemLng === "vn"
+              ? data.title?.slice(0, 85) + "..."
+              : data?.titleEN?.slice(0, 85) + "..."}
           </PostTitle>
         )}
-        <Postmeta
+        <PostMeta
           className="content-info"
-          author={user?.userName}
-          date={data.createdAt?.seconds}
-          to={slugify(data.user?.fullName || "", { lower: true })}
-        ></Postmeta>
+          author={data.user?.userName}
+          date={data.createdAt}
+          to={data.user?.id}
+        ></PostMeta>
       </div>
     </PostNewestLargeStyles>
   );

@@ -2,24 +2,24 @@ import React from "react";
 import PostNewestLarge from "../posts/PostNewestLarge";
 import PostNewestItems from "../posts/PostNewestItems";
 import PostNewestItemsMore from "../posts/PostNewestItemsMore";
-import {
-  collection,
-  limit,
-  onSnapshot,
-  query,
-  where,
-} from "firebase/firestore";
-import { db } from "../../firebase-app/firebase-config";
 import { useState } from "react";
 import { useEffect } from "react";
 import styled from "styled-components";
-import { Heading } from "../../components";
+import {
+  Heading,
+  HomeItemMoreLoading,
+  PostNewestItemsLoading,
+  PostNewestLargeLoading,
+} from "../../components";
 import { v4 } from "uuid";
 import PostCategory from "../posts/PostCategory";
-import { setLogLevel } from "firebase/app";
 import { useTranslation } from "react-i18next";
 import useViewport from "../../hooks/useViewPort";
 import { Link } from "react-router-dom";
+import axios from "axios";
+import { baseUrl } from "../../utils/constants";
+import useGetCategory from "../../hooks/useGetCategory";
+import usePagination from "../../hooks/usePagination";
 
 const HomeNewestStyles = styled.div`
   .title {
@@ -188,68 +188,31 @@ const HomeNewestStyles = styled.div`
 
 const HomeNewest = () => {
   const [posts, setPosts] = useState([]);
-  const [category, setCategory] = useState([]);
+  const [loading, setLoading] = useState([]);
   const { t } = useTranslation();
   const viewPort = useViewport();
   const isMobile = viewPort.width <= 600;
+
   useEffect(() => {
-    const colRef = collection(db, "posts");
-    const queries = query(
-      colRef,
-      where("status", "==", 1),
-      where("hot", "==", false)
-    );
-    onSnapshot(queries, (snapshot) => {
-      const results = [];
-      snapshot.forEach((doc) => {
-        results.push({
-          id: doc.id,
-          ...doc.data(),
-        });
-      });
-      setPosts(results);
-    });
-  }, []);
-  useEffect(() => {
+    setLoading(true);
     async function fetchData() {
-      const colRef = collection(db, "category");
-      onSnapshot(query(colRef), (snapshot) => {
-        let result = [];
-        snapshot.forEach((doc) => {
-          result.push({
-            id: doc.id,
-            ...doc.data(),
-          });
-        });
-        setCategory(result);
-      });
+      await axios
+        .get(baseUrl.getPost)
+        .then((result) => {
+          setPosts(result.data);
+          setLoading(false);
+        })
+        .catch((err) => console.log(err));
     }
     fetchData();
   }, []);
+  const { category } = useGetCategory();
   const [first, ...other] = posts;
   const newest = posts.slice(1, 4);
   const newestMore = posts.slice(4);
-  const [currentPage, setCurrentPage] = useState(1);
-  const [nonClick, setNonClick] = useState(false);
-  const recordPerPage = 3;
-  const lastIndex = recordPerPage * currentPage;
-  const firstIndex = lastIndex - recordPerPage;
-  const record = newestMore.slice(firstIndex, lastIndex);
-  const npage = Math.ceil(newestMore.length / recordPerPage);
-  const numbers = [...Array(npage + 1).keys()].slice(1);
-  function prePage() {
-    if (currentPage !== 1) {
-      setCurrentPage(currentPage - 1);
-    }
-  }
-  function changePage(id) {
-    setCurrentPage(id);
-  }
-  function nextPage() {
-    if (currentPage !== numbers.length) {
-      setCurrentPage(currentPage + 1);
-    }
-  }
+  const { prePage, changePage, nextPage, record, numbers, currentPage } =
+    usePagination(newestMore, 3);
+
   if (posts?.length <= 0) return null;
   return (
     <HomeNewestStyles>
@@ -259,18 +222,30 @@ const HomeNewest = () => {
         </div>
         <div className="content-newest">
           <div className="newest-large">
-            <PostNewestLarge key={v4()} data={first}></PostNewestLarge>
+            {loading ? (
+              <PostNewestLargeLoading></PostNewestLargeLoading>
+            ) : (
+              <PostNewestLarge key={v4()} data={first}></PostNewestLarge>
+            )}
           </div>
-          <div className="newest-second">
-            <div className="line-1"></div>
-            <div className="line-2"></div>
-            <div className="newest-item">
-              {newest.length > 0 &&
-                newest.map((item) => (
-                  <PostNewestItems key={v4()} data={item}></PostNewestItems>
-                ))}
+          {loading ? (
+            <PostNewestItemsLoading></PostNewestItemsLoading>
+          ) : (
+            <div className="newest-second">
+              <div className="line-1"></div>
+              <div className="line-2"></div>
+
+              <div className="newest-item">
+                {newest.length > 0 &&
+                  newest.map((item) => (
+                    <PostNewestItems
+                      key={item?._id}
+                      data={item}
+                    ></PostNewestItems>
+                  ))}
+              </div>
             </div>
-          </div>
+          )}
         </div>
         <div className="title-more">
           <Heading>{t("more")}</Heading>
@@ -296,29 +271,33 @@ const HomeNewest = () => {
             </div>
           )}
         </div>
-        <div className="newest-more">
-          <div className="post-item">
-            {other.length > 0 &&
-              record.map((item) => (
-                <PostNewestItemsMore
-                  key={v4()}
-                  data={item}
-                ></PostNewestItemsMore>
-              ))}
-          </div>
-          <div className="category">
-            <h2>{t("category")}</h2>
-            <div className="category-item">
-              {category?.map((item) => (
-                <PostCategory
-                  key={v4()}
-                  children={item.name}
-                  to={item?.slug}
-                ></PostCategory>
-              ))}
+        {loading ? (
+          <HomeItemMoreLoading></HomeItemMoreLoading>
+        ) : (
+          <div className="newest-more">
+            <div className="post-item">
+              {other.length > 0 &&
+                record.map((item) => (
+                  <PostNewestItemsMore
+                    key={item?._id}
+                    data={item}
+                  ></PostNewestItemsMore>
+                ))}
+            </div>
+            <div className="category">
+              <h2>{t("category")}</h2>
+              <div className="category-item">
+                {category?.map((item) => (
+                  <PostCategory
+                    key={item?._id}
+                    children={item.name}
+                    to={item?.slug}
+                  ></PostCategory>
+                ))}
+              </div>
             </div>
           </div>
-        </div>
+        )}
         <ul className="pagination">
           <li>
             <svg
@@ -339,11 +318,12 @@ const HomeNewest = () => {
           </li>
           {numbers?.map((number, i) => (
             <li
+              key={number}
               className={`page-item ${currentPage === number ? "active" : ""}`}
             >
-              <a href="#" onClick={() => changePage(number)}>
+              <Link href="#" onClick={() => changePage(number)}>
                 {number}
-              </a>
+              </Link>
             </li>
           ))}
           <li>

@@ -35,7 +35,7 @@ const InputStyles = styled.div`
   }
   .icon-eye {
     position: absolute;
-    right: 60px;
+    right: 30px;
     top: 50%;
     transform: translateY(-50%);
     cursor: pointer;
@@ -48,6 +48,7 @@ const Input = ({
   children,
   className = "",
   disabled = false,
+  // value,
   ...props
 }) => {
   const { field } = useController({
@@ -57,7 +58,14 @@ const Input = ({
   });
   return (
     <InputStyles disabled={disabled} hasIcon={children ? true : false}>
-      <input className="input" id={name} type={type} {...field} {...props} />
+      <input
+        className="input"
+        id={name}
+        type={type}
+        // value={value}
+        {...field}
+        {...props}
+      />
       {children}
     </InputStyles>
   );

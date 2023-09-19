@@ -3,25 +3,15 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import DashboardHeading from "../dashboard/DashboardHeading";
 import { Button, Field, Input, Label, Radio } from "../../components";
 import { useForm } from "react-hook-form";
-import { categoryValue, roleStatus } from "../../utils/constants";
+import { categoryValue, roleStatus, baseUrl } from "../../utils/constants";
 import styled from "styled-components";
-import {
-  collection,
-  doc,
-  getDoc,
-  getDocs,
-  onSnapshot,
-  query,
-  updateDoc,
-  where,
-} from "firebase/firestore";
-import { db } from "../../firebase-app/firebase-config";
 import slugify from "slugify";
 import { toast } from "react-toastify";
 import { useAuth } from "../../contexts/auth-context";
 import * as yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { useTranslation } from "react-i18next";
+import axios from "axios";
 
 const CategoryUpdateStyles = styled.div`
   .category-layout {
@@ -47,15 +37,17 @@ const CategoryUpdateStyles = styled.div`
     }
   }
 `;
-const schema = yup.object({
-  name: yup.string().required("Please enter name"),
-  slug: yup.string().required("Please enter slug"),
-});
+// const schema = yup.object({
+//   name: yup.string().required("Please enter name"),
+//   slug: yup.string().required("Please enter slug"),
+// });
 const CategoryUpdate = () => {
   const { userInfo } = useAuth();
   const { t } = useTranslation();
-  const [prevSlug, setPrevSlug] = useState("");
-  const [newSlug, setNewSlug] = useState("");
+  const [name, setName] = useState();
+  const [nameEN, setNameEN] = useState();
+  const [slug, setSlug] = useState();
+  const [status, setStatus] = useState();
   const {
     control,
     watch,
@@ -63,30 +55,36 @@ const CategoryUpdate = () => {
     handleSubmit,
     formState: { isSubmitting, errors },
   } = useForm({
-    resolver: yupResolver(schema),
+    // resolver: yupResolver(schema),
   });
   const [params] = useSearchParams();
   const categoryId = params.get("id");
   const navigate = useNavigate();
   useEffect(() => {
     async function getData() {
-      const colRef = doc(db, "category", categoryId);
-      const singleDoc = await getDoc(colRef);
-      //Reset dữ liệu các ô input về dữ liệu vừa mới lấy (singleDoc)
-      reset(singleDoc.data());
-      setPrevSlug(singleDoc.data()?.slug);
+      axios
+        .get(baseUrl.getCategoryById + categoryId)
+        .then((result) => {
+          setName(result.data.name);
+          setNameEN(result.data.nameEN);
+          setSlug(result.data.slug);
+          setStatus(result.data.status);
+        })
+        .catch((err) => console.log(err));
     }
     getData();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [categoryId, reset]);
   const handleUpdateCategory = async (values) => {
-    const colRef = doc(db, "category", categoryId);
-    await updateDoc(colRef, {
-      name: values.name,
-      slug: slugify(values.slug || values.name, { lower: true }),
-      status: Number(values.status),
-    });
-    setNewSlug(slugify(values.slug, { lower: true }));
+    axios
+      .put(baseUrl.updateCategory + categoryId, {
+        name,
+        nameEN,
+        slug: slugify(slug || name, { lower: true }),
+        status: Number(status),
+      })
+      .then((result) => console.log(result))
+      .catch((err) => console.log(err));
     toast.success(`${t("toastUpdateCategory")}`);
     navigate("/manage/category");
   };
@@ -149,34 +147,50 @@ const CategoryUpdate = () => {
               control={control}
               name="name"
               placeholder={t("categoryPlace")}
+              value={name}
+              onChange={(e) => setName(e.target.value)}
             ></Input>
           </Field>
+          <Field>
+            <Label htmlFor="name">{t("name")} EN</Label>
+            <Input
+              control={control}
+              name="name"
+              placeholder={`${t("categoryPlace")} EN`}
+              value={nameEN}
+              onChange={(e) => setNameEN(e.target.value)}
+            ></Input>
+          </Field>
+        </div>
+        <div className="category-layout">
           <Field>
             <Label htmlFor="slug">{t("slug")}</Label>
             <Input
               control={control}
               name="slug"
               placeholder={t("slugPlace")}
+              value={slug}
+              onChange={(e) => setSlug(e.target.value)}
             ></Input>
           </Field>
-        </div>
-        <div className="category-layout">
           <Field>
             <Label>{t("status")}</Label>
             <div className="radio-category">
               <Radio
                 name="status"
                 control={control}
-                checked={Number(watchStatus) === categoryValue.Approved}
+                checked={Number(status) === categoryValue.Approved}
                 value={categoryValue.Approved}
+                onChange={(e) => setStatus(e.target.value)}
               >
                 Approved
               </Radio>
               <Radio
                 name="status"
                 control={control}
-                checked={Number(watchStatus) === categoryValue.UnApproved}
+                checked={Number(status) === categoryValue.UnApproved}
                 value={categoryValue.UnApproved}
+                onChange={(e) => setStatus(e.target.value)}
               >
                 Unapproved
               </Radio>

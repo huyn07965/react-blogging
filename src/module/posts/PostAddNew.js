@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
-import styled from "styled-components";
+import styled, { css } from "styled-components";
 import {
   Button,
   DropDown,
@@ -8,23 +8,10 @@ import {
   ImageUpload,
   Input,
   Label,
-  Radio,
-  Toggle,
 } from "../../components";
 import slugify from "slugify";
-import { postValue, roleStatus } from "../../utils/constants";
-import usehandleImage from "../../hooks/useHandleImage";
-import {
-  addDoc,
-  collection,
-  doc,
-  getDoc,
-  getDocs,
-  query,
-  serverTimestamp,
-  where,
-} from "firebase/firestore";
-import { db } from "../../firebase-app/firebase-config";
+import { baseUrl, roleStatus } from "../../utils/constants";
+import useHandleImage from "../../hooks/useHandleImage";
 import { useAuth } from "../../contexts/auth-context";
 import { toast } from "react-toastify";
 import axios from "axios";
@@ -35,6 +22,7 @@ import "react-quill/dist/quill.snow.css";
 import ImageUploader from "quill-image-uploader";
 import DashboardHeading from "../dashboard/DashboardHeading";
 import { useTranslation } from "react-i18next";
+import useGetCategory from "../../hooks/useGetCategory";
 Quill.register("modules/imageUploader", ImageUploader);
 
 const PostAddNewStyles = styled.div`
@@ -61,6 +49,63 @@ const PostAddNewStyles = styled.div`
     flex-direction: column;
     row-gap: 20px;
   }
+  .title-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .show-content {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    font-size: 16px;
+    gap: 5px;
+  }
+  .vn {
+    cursor: pointer;
+    padding: 5px 20px;
+    display: flex;
+    align-items: center;
+    color: white;
+    background-color: ${(props) => props.theme.primary};
+    border-radius: 8px;
+    ${(props) =>
+      props.showContentEn === true &&
+      css`
+        background-color: ${(props) => props.theme.greyLight};
+        color: black;
+      `}
+  }
+  .en {
+    cursor: pointer;
+    padding: 5px 20px;
+    display: flex;
+    align-items: center;
+    background-color: ${(props) => props.theme.greyLight};
+    border-radius: 8px;
+    ${(props) =>
+      props.showContentEn === true &&
+      css`
+        background-color: ${(props) => props.theme.primary};
+        color: white;
+      `}
+  }
+  .content-vn {
+    display: block;
+    ${(props) =>
+      props.showContentEn === true &&
+      css`
+        display: none;
+      `}
+  }
+  .content-en {
+    display: none;
+    ${(props) =>
+      props.showContentEn === true &&
+      css`
+        display: block;
+      `}
+  }
   @media screen and (max-width: 600px) {
     .add-post {
       width: 100%;
@@ -69,12 +114,12 @@ const PostAddNewStyles = styled.div`
     }
   }
 `;
-const schema = yup.object({
-  title: yup
-    .string()
-    .required("Please enter title")
-    .min(50, "Title must be least 50 characters"),
-});
+// const schema = yup.object({
+//   title: yup
+//     .string()
+//     .required("Please enter title")
+//     .min(50, "Title must be least 50 characters"),
+// });
 const PostAddNew = () => {
   const { userInfo } = useAuth();
   const { t } = useTranslation();
@@ -88,16 +133,21 @@ const PostAddNew = () => {
     formState: { errors },
   } = useForm({
     mode: "onChange",
-    resolver: yupResolver(schema),
+    // resolver: yupResolver(schema),
     defaultValues: {
       title: "",
+      titleEN: "",
       slug: "",
       status: 2,
       hot: false,
       image: "",
+      content: "",
+      contentEN: "",
       user: {},
       category: {},
-      createdAt: serverTimestamp(),
+      view: 0,
+      like: 0,
+      // createdAt: serverTimestamp(),
     },
   });
   const {
@@ -107,36 +157,37 @@ const PostAddNew = () => {
     image,
     setImage,
     setProgress,
-  } = usehandleImage(setValue, getValues);
+  } = useHandleImage(setValue, getValues);
   const watchStatus = watch("status");
   const watchHot = watch("hot");
-  const [categoryPost, setCategoryPost] = useState([]);
-  const [selectCategory, setSelectCategory] = useState("");
+  const [selectCategory, setSelectCategory] = useState({});
   const [loading, setLoading] = useState(false);
   const [content, setContent] = useState("");
+  const [contentEN, setContentEN] = useState("");
+  const [showContentEn, setShowContentEN] = useState(false);
 
   useEffect(() => {
-    if (!userInfo?.uid) return;
+    if (!userInfo?._id) return;
     setValue("user", {
-      id: userInfo?.uid,
+      id: userInfo?._id,
+      userName: userInfo?.userName,
       slug: userInfo?.slug,
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [userInfo?.uid]);
+  }, [userInfo?._id]);
   const addPost = async (values) => {
     setLoading(true);
     try {
       const cloneValues = { ...values };
       cloneValues.slug = slugify(values.slug || values.title, { lower: true });
       cloneValues.status = Number(cloneValues.status);
-      const colRef = collection(db, "posts");
-      await addDoc(colRef, {
-        ...cloneValues,
-        image,
-        content,
-        view: 0,
-        // userId: userInfo.uid,
-      });
+      cloneValues.image = image;
+      cloneValues.content = content;
+      cloneValues.contentEN = contentEN;
+      axios
+        .post(baseUrl.cretePost, cloneValues)
+        .then((result) => console.log(result))
+        .catch((err) => console.log(err));
       toast.success(`${t("toastCreatePost")}`);
       reset({
         title: "",
@@ -151,6 +202,7 @@ const PostAddNew = () => {
       setImage("");
       setSelectCategory("");
       setContent("");
+      setContentEN("");
       setProgress(0);
       document.body.scrollIntoView({ behavior: "smooth", block: "start" });
     } catch (erorr) {
@@ -159,32 +211,56 @@ const PostAddNew = () => {
       setLoading(false);
     }
   };
-  useEffect(() => {
-    async function getData() {
-      const colRef = collection(db, "category");
-      const q = query(colRef, where("status", "==", 1));
-      const querySnapshot = await getDocs(q);
-      let result = [];
-      querySnapshot.forEach((doc) => {
-        result.push({
-          id: doc.id,
-          ...doc.data(),
-        });
-      });
-      setCategoryPost(result);
-    }
-    getData();
-  }, []);
+  const { category } = useGetCategory();
+  // useEffect(() => {
+  //   async function fetchData() {
+  //     await axios
+  //       .get(baseUrl.getCategory)
+  //       .then((result) => setCategory(result.data))
+  //       .catch((err) => console.log(err));
+  //   }
+  //   fetchData();
+  // }, []);
   const handleOnClick = async (item) => {
-    const colRef = doc(db, "category", item.id);
-    const docData = await getDoc(colRef);
     setValue("category", {
-      id: docData?.id,
-      slug: docData.data()?.slug,
+      id: item._id,
+      name: item.name,
+      nameEN: item.nameEN,
+      slug: item.slug,
     });
     setSelectCategory(item);
   };
   const modules = useMemo(
+    () => ({
+      toolbar: [
+        ["bold", "italic", "underline", "strike"],
+        ["blockquote"],
+        [{ header: 1 }, { header: 2 }], // custom button values
+        [{ list: "ordered" }, { list: "bullet" }],
+        [{ header: [1, 2, 3, 4, 5, 6, false] }],
+        ["link", "image"],
+      ],
+      imageUploader: {
+        upload: async (file) => {
+          console.log("upload: ~ file", file);
+          const bodyFormData = new FormData();
+          console.log("upload: ~ bodyFormData", bodyFormData);
+          bodyFormData.append("image", file);
+          const response = await axios({
+            method: "post",
+            url: "https://api.imgbb.com/1/upload?key=2b50a1f27ed98d03cc9f0e726b8fc2ab",
+            data: bodyFormData,
+            headers: {
+              "Content-Type": "multipart/form-data",
+            },
+          });
+          return response.data.data.url;
+        },
+      },
+    }),
+    []
+  );
+  const modulesEN = useMemo(
     () => ({
       toolbar: [
         ["bold", "italic", "underline", "strike"],
@@ -228,7 +304,7 @@ const PostAddNew = () => {
   });
   if (userInfo?.role !== roleStatus.Admin) return null;
   return (
-    <PostAddNewStyles>
+    <PostAddNewStyles showContentEn={showContentEn}>
       <DashboardHeading
         title={t("newPost")}
         desc={t("addNewPost")}
@@ -244,26 +320,26 @@ const PostAddNew = () => {
             ></Input>
           </Field>
           <Field>
-            <Label htmlFor="slug">{t("slug")}</Label>
+            <Label htmlFor="title">{t("title")} EN</Label>
             <Input
               control={control}
-              placeholder={t("slugPlace")}
-              name="slug"
+              placeholder={`${t("titlePlace")} EN`}
+              name="titleEN"
             ></Input>
           </Field>
         </div>
         <div className="add-post">
           <Field>
-            <Label>{t("status")}</Label>
+            {/* <Label>{t("status")}</Label>
             <div className="status">
               <Radio
                 name="status"
                 control={control}
-                checked={Number(watchStatus) === postValue.Approved}
-                onClick={() => setValue("status", "approved")}
-                value={postValue.Approved}
+                checked={Number(watchStatus) === postValue.Active}
+                onClick={() => setValue("status", "active")}
+                value={postValue.Active}
               >
-                Approved
+                Active
               </Radio>
               <Radio
                 name="status"
@@ -283,7 +359,13 @@ const PostAddNew = () => {
               >
                 Reject
               </Radio>
-            </div>
+            </div> */}
+            <Label htmlFor="slug">{t("slug")}</Label>
+            <Input
+              control={control}
+              placeholder={t("slugPlace")}
+              name="slug"
+            ></Input>
           </Field>
           <Field>
             <Label>{t("category")}</Label>
@@ -294,12 +376,12 @@ const PostAddNew = () => {
                 }`}
               ></DropDown.Select>
               <DropDown.List>
-                {categoryPost?.map((item) => (
+                {category?.map((item) => (
                   <DropDown.Options
-                    key={item.id}
+                    key={item._id}
                     onClick={() => handleOnClick(item)}
                   >
-                    {item.name}
+                    {item?.name}
                   </DropDown.Options>
                 ))}
               </DropDown.List>
@@ -320,21 +402,40 @@ const PostAddNew = () => {
             ></ImageUpload>
           </Field>
           <Field>
-            <Label>{t("feature")}</Label>
+            {/* <Label>{t("feature")}</Label>
             <Toggle
               on={watchHot === true}
               onClick={() => setValue("hot", !watchHot)}
-            ></Toggle>
+            ></Toggle> */}
           </Field>
         </div>
+
         <div className="content entry-content">
-          <Label>{t("content")}</Label>
-          <div>
+          <div className="title-content">
+            <Label>{t("content")}</Label>
+            <div className="show-content">
+              <div className="vn" onClick={() => setShowContentEN(false)}>
+                VN
+              </div>
+              <div className="en" onClick={() => setShowContentEN(true)}>
+                EN
+              </div>
+            </div>
+          </div>
+          <div className="content-vn">
             <ReactQuill
               modules={modules}
               theme="snow"
               value={content}
               onChange={setContent}
+            />
+          </div>
+          <div className="content-en">
+            <ReactQuill
+              modules={modulesEN}
+              theme="snow"
+              value={contentEN}
+              onChange={setContentEN}
             />
           </div>
         </div>

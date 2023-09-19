@@ -9,6 +9,8 @@ import { toast } from "react-toastify";
 import slugify from "slugify";
 import { useTranslation } from "react-i18next";
 import Translate from "../translate/Translate";
+import useViewport from "../../hooks/useViewPort";
+import Notification from "../notification/Notification";
 
 const HeaderStyles = styled.header`
   position: fixed;
@@ -45,6 +47,17 @@ const HeaderStyles = styled.header`
       list-style: none;
       font-weight: 500;
       font-size: 18px;
+      line-height: 27px;
+    }
+  }
+  .menu-mobile {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    li {
+      list-style: none;
+      font-weight: 500;
+      font-size: 16px;
       line-height: 27px;
     }
   }
@@ -106,6 +119,7 @@ const HeaderStyles = styled.header`
     display: flex;
     align-items: center;
     justify-content: center;
+    cursor: pointer;
     background-image: linear-gradient(
       to right bottom,
       ${(props) => props.theme.primary},
@@ -117,6 +131,7 @@ const HeaderStyles = styled.header`
     padding-left: 10px;
     position: absolute;
     right: 15px;
+    cursor: pointer;
   }
   .icon {
     width: 20px;
@@ -134,22 +149,15 @@ const HeaderStyles = styled.header`
     width: 20px;
     height: 20px;
     color: ${(props) => props.theme.primary};
+    cursor: pointer;
   }
-  .notification {
-    position: absolute;
-    top: 0;
-    right: -5px;
-    color: white;
-    background-color: red;
-    font-size: 10px;
-    padding: 2px 6px;
-    border-radius: 10px;
-  }
+
   .avatar {
-    min-width: 50px;
-    max-width: 50px;
-    height: 50px;
+    min-width: 40px;
+    max-width: 40px;
+    height: 40px;
     border-radius: 100%;
+    cursor: pointer;
   }
   .image {
     width: 100%;
@@ -173,6 +181,7 @@ const HeaderStyles = styled.header`
     height: 40px;
     font-weight: 600;
   }
+
   @media screen and (max-width: 600px) {
     .header-main {
       margin: 0 auto;
@@ -194,9 +203,9 @@ const HeaderStyles = styled.header`
       height: 35px;
     }
     .avatar {
-      min-width: 40px;
-      max-width: 40px;
-      height: 40px;
+      min-width: 35px;
+      max-width: 35px;
+      height: 35px;
     }
     .user-name {
       display: none;
@@ -220,8 +229,13 @@ const Header = () => {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const [showSearch, setShowSearch] = useState(false);
+  const [showMenu, setShowMenu] = useState(false);
   const [search, setSearch] = useState("");
   const [notification, setNotification] = useState(false);
+  const viewPort = useViewport();
+  const [showNotification, setShowNotification] = useState(false);
+  const isMobile = viewPort.width <= 600;
+
   // function runScript(event) {
   //   if (event.which == 13 || event.keyCode == 13) {
   //     //code to execute here
@@ -253,6 +267,10 @@ const Header = () => {
     } else {
       toast.error(`${t("notificationFind")}`);
     }
+  };
+  const handleOutsideClick = () => {
+    // Xử lý sự kiện click chuột bên ngoài component con ở đây
+    setShowNotification(false);
   };
   return (
     <HeaderStyles>
@@ -305,6 +323,48 @@ const Header = () => {
               <NavLink to="/">
                 <img src="/blogging.png" alt="blogging" className="blogging" />
               </NavLink>
+              {isMobile && (
+                <div>
+                  <div
+                    className="background-icon"
+                    onClick={() => setShowMenu(!showMenu)}
+                  >
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      strokeWidth="2"
+                      stroke="currentColor"
+                      className="icon"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        d="M3.75 9h16.5m-16.5 6.75h16.5"
+                      />
+                    </svg>
+                  </div>
+                </div>
+              )}
+              {showMenu && (
+                <ul className="menu-mobile">
+                  <li>
+                    <NavLink className="menu-item" to="/">
+                      {t("home")}
+                    </NavLink>
+                  </li>
+                  <li>
+                    <NavLink className="menu-item" to="/blog">
+                      {t("blog")}
+                    </NavLink>
+                  </li>
+                  <li>
+                    <NavLink className="menu-item" to="/contact">
+                      {t("about")}
+                    </NavLink>
+                  </li>
+                </ul>
+              )}
               <ul className="menu">
                 <li>
                   <NavLink className="menu-item" to="/">
@@ -323,25 +383,13 @@ const Header = () => {
                 </li>
               </ul>
             </div>
-
             <div className="header-right">
-              {/* <div className="background-icon">
-                {!notification && <div className="notification">12</div>}
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  strokeWidth="2"
-                  stroke="currentColor"
-                  className="icon"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    d="M14.857 17.082a23.848 23.848 0 005.454-1.31A8.967 8.967 0 0118 9.75v-.7V9A6 6 0 006 9v.75a8.967 8.967 0 01-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 01-5.714 0m5.714 0a3 3 0 11-5.714 0"
-                  />
-                </svg>
-              </div> */}
+              <Notification
+                showNotification={showNotification}
+                setShowNotification={setShowNotification}
+                notification={notification}
+                onOutsideClick={handleOutsideClick}
+              ></Notification>
               <div>
                 <Translate></Translate>
               </div>
@@ -370,7 +418,7 @@ const Header = () => {
                   to="/sign-in"
                   className="button"
                 >
-                  Sign In
+                  {t("signIn")}
                 </Button>
               ) : (
                 <>

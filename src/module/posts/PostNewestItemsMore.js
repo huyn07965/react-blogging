@@ -2,15 +2,13 @@ import React from "react";
 import styled from "styled-components";
 import PostCategory from "./PostCategory";
 import PostImage from "./PostImage";
-import Postmeta from "./Postmeta";
+import PostMeta from "./PostMeta";
 import PostTitle from "./PostTitle";
 import slugify from "slugify";
 import { useAuth } from "../../contexts/auth-context";
 import SavePost from "../../components/savepost/SavePost";
 import { useNavigate } from "react-router-dom";
 import useSavePost from "../../hooks/useSavePost";
-import useGetCategory from "../../hooks/useGetCategory";
-import useGetUserPost from "../../hooks/useGetUserPost";
 
 const PostNewestItemsMoreStyles = styled.div`
   width: 100%;
@@ -82,12 +80,11 @@ const PostNewestItemsMoreStyles = styled.div`
 `;
 
 const PostNewestItemsMore = ({ data }) => {
-  const { userInfo } = useAuth();
+  const { userInfo, save, setSave } = useAuth();
+  const itemLng = localStorage.getItem("lng");
   const navigate = useNavigate();
-  const { category } = useGetCategory(data?.category?.id);
-  const { user } = useGetUserPost(data?.user?.id);
-  const { handleWatchLater, savePost } = useSavePost(data.id);
-  if (!data.id) return null;
+  const { handleWatchLater, savePost } = useSavePost(data?._id);
+  if (!data._id) return null;
   return (
     <PostNewestItemsMoreStyles>
       <div className="newest-item-more">
@@ -100,29 +97,43 @@ const PostNewestItemsMore = ({ data }) => {
         ></PostImage>
         <div className="content">
           <div className="content-newest-top">
-            <PostCategory to={category?.slug}>{category?.name}</PostCategory>
+            <PostCategory to={data.category?.slug}>
+              {itemLng === "vn" ? data.category?.name : data.category?.nameEN}
+            </PostCategory>
             <SavePost
-              onClick={userInfo ? handleWatchLater : () => navigate("/sign-in")}
+              onClick={
+                userInfo
+                  ? () => {
+                      handleWatchLater();
+                      setSave(!save);
+                    }
+                  : () => navigate("/sign-in")
+              }
               savePost={savePost}
-              data={data.id}
+              data={data._id}
             ></SavePost>
           </div>
           <PostTitle
             className="content-newest-center"
             to={data?.slug}
-            title={data?.title}
+            title={itemLng === "vn" ? data?.title : data?.titleEN}
           >
-            {data.title?.length > 100
-              ? data?.title.slice(0, 100) + "..."
-              : data?.title}
+            {data.title?.length > 100 ? (
+              <>
+                {itemLng === "vn"
+                  ? data.title?.slice(0, 100) + "..."
+                  : data?.titleEN?.slice(0, 100) + "..."}
+              </>
+            ) : (
+              <>{itemLng === "vn" ? data?.title : data?.titleEN}</>
+            )}
           </PostTitle>
-          <Postmeta
+          <PostMeta
             className="content-info"
-            author={user?.userName}
-            date={data.createdAt?.seconds}
-            to={slugify(user?.slug || "", { lower: true })}
-            // to={user?.id}
-          ></Postmeta>
+            author={data.user?.userName}
+            date={data.createdAt}
+            to={data.user?.id}
+          ></PostMeta>
         </div>
       </div>
     </PostNewestItemsMoreStyles>

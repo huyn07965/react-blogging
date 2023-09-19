@@ -1,33 +1,19 @@
 import React, { useEffect, useState } from "react";
-import { collection, onSnapshot, query, where } from "firebase/firestore";
-import { db } from "../firebase-app/firebase-config";
+import axios from "axios";
+import { baseUrl } from "../utils/constants";
 
-export default function useGetPost(userId, search) {
+export default function useGetPost(slug) {
   const [postList, setPostList] = useState([]);
 
   useEffect(() => {
-    async function getData() {
-      const colRef = collection(db, "posts");
-      const newSearch = search
-        ? query(
-            colRef,
-            where("title", ">=", search),
-            where("title", "<=", search + "utf8")
-          )
-        : query(colRef, where("user.id", "==", userId));
-      onSnapshot(newSearch, (snapshot) => {
-        let result = [];
-        snapshot.forEach((doc) => {
-          result.push({
-            id: doc.id,
-            ...doc.data(),
-          });
-        });
-        setPostList(result);
-      });
+    async function fetchData() {
+      await axios
+        .get(baseUrl.getPostAuthor + slug)
+        .then((result) => setPostList(result.data))
+        .catch((err) => console.log(err));
     }
-    getData();
-  }, [userId, search]);
+    fetchData();
+  }, [slug]);
   return {
     postList,
   };
