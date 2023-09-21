@@ -34,8 +34,8 @@ export const roleStatus = {
   User: 3,
 };
 
-// const api = "http://localhost:3001";
-const api = "https://node-app-blogging.onrender.com";
+const api = "http://localhost:3001";
+// const api = "https://node-app-blogging.onrender.com";
 
 export const baseUrl = {
   getCategory: `${api}/category`,

@@ -70,7 +70,7 @@ const CategoryAddNew = () => {
     newValues.status = Number(newValues.status);
     try {
       axios
-        // .post("http://localhost:3001/createCategory", newValues)
+        // .post("https://node-app-blogging.onrender.com/createCategory", newValues)
         .post(baseUrl.creteCategory, newValues)
         .then((result) => console.log(result))
         .catch((err) => console.log(err));

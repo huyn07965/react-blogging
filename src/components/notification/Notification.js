@@ -77,6 +77,7 @@ const Notification = ({
       document.removeEventListener("mousedown", handleClickOutside);
     };
   }, [onOutsideClick]);
+  console.log("data lenght", data.length);
   return (
     <NotificationStyles
       onClick={() => setShowNotification(!showNotification)}
@@ -84,7 +85,7 @@ const Notification = ({
     >
       <div className="body-notification">
         <div className="background-icon">
-          {!notification && <div className="notification"></div>}
+          {data.length > 0 && <div className="notification"></div>}
           <svg
             xmlns="http://www.w3.org/2000/svg"
             fill="none"

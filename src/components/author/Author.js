@@ -4,6 +4,8 @@ import styled from "styled-components";
 import { doc, getDoc } from "firebase/firestore";
 import { db } from "../../firebase-app/firebase-config";
 import { useState } from "react";
+import axios from "axios";
+import { baseUrl } from "../../utils/constants";
 
 const AuthorStyles = styled.div`
   margin: 40px 0;
@@ -14,8 +16,8 @@ const AuthorStyles = styled.div`
   justify-content: space-between;
   gap: 40px;
   .image-author {
-    width: 237px;
-    height: 237px;
+    width: 150px;
+    height: 150px;
     border-radius: 20px;
   }
   .info-author {
@@ -42,17 +44,20 @@ const AuthorStyles = styled.div`
 `;
 
 const Author = ({ userId = "" }) => {
-  const [user, setUser] = useState([]);
+  const [user, setUser] = useState({});
+  const itemLng = localStorage.getItem("lng");
   useEffect(() => {
     async function fetchData() {
-      const docRef = doc(db, "users", userId);
-      const docSnapShot = await getDoc(docRef);
-      if (docSnapShot.data()) {
-        setUser(docSnapShot.data());
-      }
+      await axios
+        .get(baseUrl.getUserById + userId)
+        .then((result) => {
+          setUser(result.data);
+        })
+        .catch((err) => console.log(err));
     }
     fetchData();
   }, [userId]);
+  console.log("data user", user);
   if (!userId) return null;
   return (
     <AuthorStyles>
@@ -64,8 +69,10 @@ const Author = ({ userId = "" }) => {
       <div className="info-author">
         <h3>{user.fullName}</h3>
         <p className="description-author">
-          {user?.description ||
-            "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. "}
+          {itemLng === "vn"
+            ? user?.description
+            : user?.descriptionEN ||
+              "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. "}
         </p>
       </div>
     </AuthorStyles>

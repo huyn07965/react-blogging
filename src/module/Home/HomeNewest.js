@@ -211,7 +211,7 @@ const HomeNewest = () => {
   const newest = posts.slice(1, 4);
   const newestMore = posts.slice(4);
   const { prePage, changePage, nextPage, record, numbers, currentPage } =
-    usePagination(newestMore, 3);
+    usePagination(newestMore, 10);
 
   if (posts?.length <= 0) return null;
   return (

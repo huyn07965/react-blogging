@@ -435,8 +435,8 @@ const DetailPage = () => {
                 </div>
                 <div>
                   <FacebookShareButton
-                    // url={`http://localhost:3000/post/${slug}`}
-                    url="https://vnexpress.net/vietinbank-co-nguoi-phu-trach-ban-dieu-hanh-moi-4646366.html"
+                    url={`https://react-app-blogging.onrender.com/post/${slug}`}
+                    // url="https://vnexpress.net/vietinbank-co-nguoi-phu-trach-ban-dieu-hanh-moi-4646366.html"
                     quote={"Title or jo bhi aapko likhna ho"}
                     // hashtag={"#portfolio..."}
                   >
@@ -452,7 +452,7 @@ const DetailPage = () => {
             <div className="content-bottom">
               <div className="entry-content">
                 <Label className="title-comment" htmlFor="comment">
-                  Hãy đưa nhận xét
+                  {t("commentTit")}
                 </Label>
                 <form onSubmit={handleSubmit(handleComment)}>
                   <div className="comment">
@@ -473,7 +473,7 @@ const DetailPage = () => {
                 </form>
               </div>
               <div className="comment-user">
-                <h1 className="title-comment">Ý kiến của độc giả</h1>
+                <h1 className="title-comment">{t("userComment")}</h1>
                 {infoComment?.map((comment) => (
                   <Comment
                     key={comment?._id}

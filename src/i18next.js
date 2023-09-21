@@ -161,6 +161,8 @@ i18next.use(initReactI18next).init({
         signInErrValid: "Email hoặc mật khẩu không đúng! Vui lòng nhập lại",
         toastSignIn: "Vui lòng nhập đầy đủ thông tin",
         validPass: "Mật khẩu phải có ít nhất 8 kí tự",
+        commentTit: "Hãy đưa nhận xét",
+        userComment: "Ý kiến của độc giả",
       },
     },
     en: {
@@ -320,6 +322,8 @@ i18next.use(initReactI18next).init({
         signInErrValid: "Email or password is incorrect! Please re-enter",
         toastSignIn: "Please enter all the required information",
         validPass: "The password must be at least 8 characters",
+        commentTit: "Please leave your feedback",
+        userComment: "Reader's opinion",
       },
     },
   },
